@@ -4,12 +4,14 @@
 // import { FinanceDashboard } from '@/pages/finance/FinanceDashboard';
 
 import React from 'react';
-import DemoForm from '@/pages/demo/DemoForm';
-import DemoClient from '@/pages/demo/DemoClient';
-import LeadCreate from '@/pages/leads/LeadCreate';
-import ClientList from '@/pages/clients/ClientList';
-import ClientDetails from '@/pages/clients/ClientDetails';
-import ClientEdit from '@/pages/clients/ClientEdit';
+import DemoForm from '../pages/demo/DemoForm';
+import DemoClient from '../pages/demo/DemoClient';
+import LeadCreate from '../pages/leads/LeadCreate';
+import ClientList from '../pages/clients/ClientList';
+import ClientDetails from '../pages/clients/ClientDetails';
+import ClientEdit from '../pages/clients/ClientEdit';
+import InventoryList from '../pages/inventory/InventoryList';
+import InventoryCreate from '../pages/inventory/InventoryCreate';
 
 const FinanceDashboard: React.FC = () => <div>Finance Dashboard Placeholder</div>;
 
@@ -75,6 +77,22 @@ export const routeRegistry: AppRoute[] = [
     icon: '✏️',
     parent: '/clients',
     roles: ['Admin', 'AccountManager', 'CS', 'Finance'],
+  },
+  {
+    path: '/inventory',
+    component: InventoryList,
+    label: 'Inventory',
+    icon: '📦',
+    parent: null,
+    roles: ['Admin', 'Ops', 'WarehouseManager', 'WarehouseStaff'],
+  },
+  {
+    path: '/inventory/new',
+    component: InventoryCreate,
+    label: 'New Inventory Item',
+    icon: '➕',
+    parent: '/inventory',
+    roles: ['Admin', 'Ops', 'WarehouseManager'],
   },
 ];
 
