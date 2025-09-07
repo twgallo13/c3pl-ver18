@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { getPurchaseOrders, removePurchaseOrder } from '../../lib/repos/poRepo';
 import { useToast } from '../../components/ui/Toast';
 import { clientName, vendorName } from '../../lib/lookup';
+import { toCSV, downloadCSV } from '../../lib/csv';
 
 export default function POList() {
   const [items, setItems] = React.useState(() => getPurchaseOrders());
@@ -43,6 +44,22 @@ export default function POList() {
           border:'1px solid var(--color-border)', borderRadius:'var(--radius)',
           padding:'0.5rem 0.75rem', background:'transparent', color:'var(--color-fg)', cursor:'pointer'
         }}>Refresh</button>
+        <button
+          onClick={() => {
+            const rows = getPurchaseOrders().map(po => ({
+              id: po.id, clientId: po.clientId, vendorId: po.vendorId,
+              status: po.status, createdAt: po.createdAt,
+              expectedAt: po.expectedAt ?? '', lineCount: po.lines.length
+            }));
+            const csv = toCSV(rows, ['id','clientId','vendorId','status','createdAt','expectedAt','lineCount']);
+            downloadCSV(`purchase_orders_${new Date().toISOString().slice(0,10)}.csv`, csv);
+          }}
+          style={{ border:'1px solid var(--color-border)', borderRadius:'var(--radius)',
+                   padding:'0.5rem 0.75rem', background:'transparent',
+                   color:'var(--color-fg)', cursor:'pointer' }}
+        >
+          Export CSV
+        </button>
       </div>
 
       {filtered.length === 0 ? (

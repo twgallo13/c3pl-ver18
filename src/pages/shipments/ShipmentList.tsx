@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { getShipments, removeShipment } from '../../lib/repos/shipmentRepo';
 import { useToast } from '../../components/ui/Toast';
 import { clientName } from '../../lib/lookup';
+import { toCSV, downloadCSV } from '../../lib/csv';
 
 export default function ShipmentList() {
   const [items, setItems] = React.useState(() => getShipments());
@@ -44,6 +45,23 @@ export default function ShipmentList() {
           border:'1px solid var(--color-border)', borderRadius:'var(--radius)',
           padding:'0.5rem 0.75rem', background:'transparent', color:'var(--color-fg)', cursor:'pointer'
         }}>Refresh</button>
+        <button
+          onClick={() => {
+            const rows = getShipments().map(s => ({
+              id: s.id, clientId: s.clientId, carrier: s.carrier,
+              tracking: s.tracking ?? '', status: s.status,
+              createdAt: s.createdAt, shippedAt: s.shippedAt ?? '',
+              lineCount: s.lines.length
+            }));
+            const csv = toCSV(rows, ['id','clientId','carrier','tracking','status','createdAt','shippedAt','lineCount']);
+            downloadCSV(`shipments_${new Date().toISOString().slice(0,10)}.csv`, csv);
+          }}
+          style={{ border:'1px solid var(--color-border)', borderRadius:'var(--radius)',
+                   padding:'0.5rem 0.75rem', background:'transparent',
+                   color:'var(--color-fg)', cursor:'pointer' }}
+        >
+          Export CSV
+        </button>
       </div>
 
       {filtered.length === 0 ? (

@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { getInventory, removeInventoryItem } from '../../lib/repos/inventoryRepo';
 import { useToast } from '../../components/ui/Toast';
+import { toCSV, downloadCSV } from '../../lib/csv';
 
 export default function InventoryList() {
   const [items, setItems] = React.useState(() => getInventory());
@@ -39,6 +40,22 @@ export default function InventoryList() {
           border:'1px solid var(--color-border)', borderRadius:'var(--radius)',
           padding:'0.5rem 0.75rem', background:'transparent', color:'var(--color-fg)', cursor:'pointer'
         }}>Refresh</button>
+        <button
+          onClick={() => {
+            const rows = getInventory().map(i => ({
+              id: i.id, sku: i.sku, name: i.name,
+              upc: i.upc ?? '', qtyOnHand: i.qtyOnHand,
+              qtyAllocated: i.qtyAllocated, location: i.location ?? ''
+            }));
+            const csv = toCSV(rows, ['id','sku','name','upc','qtyOnHand','qtyAllocated','location']);
+            downloadCSV(`inventory_${new Date().toISOString().slice(0,10)}.csv`, csv);
+          }}
+          style={{ border:'1px solid var(--color-border)', borderRadius:'var(--radius)',
+                   padding:'0.5rem 0.75rem', background:'transparent',
+                   color:'var(--color-fg)', cursor:'pointer' }}
+        >
+          Export CSV
+        </button>
       </div>
 
       {filtered.length === 0 ? (
