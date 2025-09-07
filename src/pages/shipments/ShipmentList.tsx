@@ -7,18 +7,22 @@ import { toCSV, downloadCSV } from '../../lib/csv';
 
 export default function ShipmentList() {
   const [items, setItems] = React.useState(() => getShipments());
-  const [qCarrier, setQCarrier] = React.useState('');
-  const [qTrack, setQTrack] = React.useState('');
-  const [status, setStatus] = React.useState('');
+  const [qCarrier, setQCarrier] = React.useState<string>('');
+  const [qTrack, setQTrack] = React.useState<string>('');
+  const [status, setStatus] = React.useState<string>('');
   const { push } = useToast();
 
   function refresh() { setItems(getShipments()); }
-  const ci = (s: string, q: string) => s.toLowerCase().includes(q.trim().toLowerCase());
+  const ci = (s: string | undefined, q: string | undefined) => {
+    const sv = (s ?? '').toString().toLowerCase();
+    const qv = (q ?? '').toString().toLowerCase();
+    return sv.includes(qv.trim());
+  };
 
   const filtered = React.useMemo(() =>
     items.filter(s =>
       (qCarrier ? ci(s.carrier, qCarrier) : true) &&
-      (qTrack ? ci(s.tracking ?? '', qTrack) : true) &&
+      (qTrack ? ci(s.tracking, qTrack) : true) &&
       (status ? s.status === status : true)
     ),
   [items, qCarrier, qTrack, status]);
@@ -63,13 +67,13 @@ export default function ShipmentList() {
         }}>Refresh</button>
         <button
           onClick={() => {
-            const rows = getShipments().map(s => ({
+            const allRows = getShipments().map(s => ({
               id: s.id, clientId: s.clientId, carrier: s.carrier,
               tracking: s.tracking ?? '', status: s.status,
               createdAt: s.createdAt, shippedAt: s.shippedAt ?? '',
               lineCount: s.lines.length
             }));
-            const csv = toCSV(rows, ['id','clientId','carrier','tracking','status','createdAt','shippedAt','lineCount']);
+            const csv = toCSV(allRows, ['id','clientId','carrier','tracking','status','createdAt','shippedAt','lineCount']);
             downloadCSV(`shipments_${new Date().toISOString().slice(0,10)}.csv`, csv);
           }}
           style={{ border:'1px solid var(--color-border)', borderRadius:'var(--radius)',
@@ -103,9 +107,12 @@ export default function ShipmentList() {
                   </div>
                 </div>
                 <div style={{ display:'flex', gap:'0.5rem' }}>
-                  <button onClick={() => { 
+                  <button onClick={() => {
                     if (!confirm('Delete this shipment?')) return;
-                    removeShipment(s.id); refresh(); push({ text: 'Shipment deleted', kind: 'success' }); 
+                    // Only run async after confirm
+                    removeShipment(s.id);
+                    refresh();
+                    push({ text: 'Shipment deleted', kind: 'success' });
                   }} style={{
                     border:'1px solid var(--color-border)', borderRadius:'var(--radius)',
                     padding:'0.35rem 0.6rem', background:'transparent', color:'var(--color-fg)', cursor:'pointer'

@@ -7,13 +7,17 @@ import { toCSV, downloadCSV } from '../../lib/csv';
 
 export default function POList() {
   const [items, setItems] = React.useState(() => getPurchaseOrders());
-  const [qClient, setQClient] = React.useState('');
-  const [qVendor, setQVendor] = React.useState('');
-  const [status, setStatus] = React.useState('');
+  const [qClient, setQClient] = React.useState<string>('');
+  const [qVendor, setQVendor] = React.useState<string>('');
+  const [status, setStatus] = React.useState<string>('');
   const { push } = useToast();
 
   function refresh() { setItems(getPurchaseOrders()); }
-  const ci = (s: string, q: string) => s.toLowerCase().includes(q.trim().toLowerCase());
+  const ci = (s: string | undefined, q: string | undefined) => {
+    const sv = (s ?? '').toString().toLowerCase();
+    const qv = (q ?? '').toString().toLowerCase();
+    return sv.includes(qv.trim());
+  };
 
   const filtered = React.useMemo(() =>
     items.filter(po =>
@@ -63,12 +67,12 @@ export default function POList() {
         }}>Refresh</button>
         <button
           onClick={() => {
-            const rows = getPurchaseOrders().map(po => ({
+            const allRows = getPurchaseOrders().map(po => ({
               id: po.id, clientId: po.clientId, vendorId: po.vendorId,
               status: po.status, createdAt: po.createdAt,
               expectedAt: po.expectedAt ?? '', lineCount: po.lines.length
             }));
-            const csv = toCSV(rows, ['id','clientId','vendorId','status','createdAt','expectedAt','lineCount']);
+            const csv = toCSV(allRows, ['id','clientId','vendorId','status','createdAt','expectedAt','lineCount']);
             downloadCSV(`purchase_orders_${new Date().toISOString().slice(0,10)}.csv`, csv);
           }}
           style={{ border:'1px solid var(--color-border)', borderRadius:'var(--radius)',
@@ -104,9 +108,12 @@ export default function POList() {
                   </div>
                 </div>
                 <div style={{ display:'flex', gap:'0.5rem' }}>
-                  <button onClick={() => { 
+                  <button onClick={() => {
                     if (!confirm('Delete this purchase order?')) return;
-                    removePurchaseOrder(po.id); refresh(); push({ text: 'Purchase Order deleted', kind: 'success' }); 
+                    // Only run async after confirm
+                    removePurchaseOrder(po.id);
+                    refresh();
+                    push({ text: 'Purchase Order deleted', kind: 'success' });
                   }} style={{
                     border:'1px solid var(--color-border)', borderRadius:'var(--radius)',
                     padding:'0.35rem 0.6rem', background:'transparent', color:'var(--color-fg)', cursor:'pointer'

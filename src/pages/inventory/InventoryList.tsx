@@ -6,19 +6,23 @@ import { toCSV, downloadCSV } from '../../lib/csv';
 
 export default function InventoryList() {
   const [items, setItems] = React.useState(() => getInventory());
-  const [qSku, setQSku] = React.useState('');
-  const [qName, setQName] = React.useState('');
-  const [qLoc, setQLoc] = React.useState('');
+  const [qSku, setQSku] = React.useState<string>('');
+  const [qName, setQName] = React.useState<string>('');
+  const [qLoc, setQLoc] = React.useState<string>('');
   const { push } = useToast();
 
   function refresh() { setItems(getInventory()); }
-  const ci = (s: string, q: string) => s.toLowerCase().includes(q.trim().toLowerCase());
+  const ci = (s: string | undefined, q: string | undefined) => {
+    const sv = (s ?? '').toString().toLowerCase();
+    const qv = (q ?? '').toString().toLowerCase();
+    return sv.includes(qv.trim());
+  };
 
   const filtered = React.useMemo(() => {
     return items.filter(i =>
-      (qSku ? ci(i.sku ?? '', qSku) : true) &&
-      (qName ? ci(i.name ?? '', qName) : true) &&
-      (qLoc ? ci(i.location ?? '', qLoc) : true)
+      (qSku ? ci(i.sku, qSku) : true) &&
+      (qName ? ci(i.name, qName) : true) &&
+      (qLoc ? ci(i.location, qLoc) : true)
     );
   }, [items, qSku, qName, qLoc]);
 
@@ -59,12 +63,12 @@ export default function InventoryList() {
         }}>Refresh</button>
         <button
           onClick={() => {
-            const rows = getInventory().map(i => ({
+            const allRows = getInventory().map(i => ({
               id: i.id, sku: i.sku, name: i.name,
               upc: i.upc ?? '', qtyOnHand: i.qtyOnHand,
               qtyAllocated: i.qtyAllocated, location: i.location ?? ''
             }));
-            const csv = toCSV(rows, ['id','sku','name','upc','qtyOnHand','qtyAllocated','location']);
+            const csv = toCSV(allRows, ['id','sku','name','upc','qtyOnHand','qtyAllocated','location']);
             downloadCSV(`inventory_${new Date().toISOString().slice(0,10)}.csv`, csv);
           }}
           style={{ border:'1px solid var(--color-border)', borderRadius:'var(--radius)',
@@ -93,9 +97,12 @@ export default function InventoryList() {
                 </div>
                 <div style={{ display:'flex', gap:'0.5rem' }}>
                   {/* Future: edit route */}
-                  <button onClick={() => { 
+                  <button onClick={() => {
                     if (!confirm('Delete this inventory item?')) return;
-                    removeInventoryItem(i.id); refresh(); push({ text: 'Inventory item deleted', kind: 'success' }); 
+                    // Only run async after confirm
+                    removeInventoryItem(i.id);
+                    refresh();
+                    push({ text: 'Inventory item deleted', kind: 'success' });
                   }} style={{
                     border:'1px solid var(--color-border)', borderRadius:'var(--radius)',
                     padding:'0.35rem 0.6rem', background:'transparent', color:'var(--color-fg)', cursor:'pointer'
