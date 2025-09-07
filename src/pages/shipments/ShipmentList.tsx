@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { getShipments, removeShipment } from '../../lib/repos/shipmentRepo';
 import { useToast } from '../../components/ui/Toast';
+import { clientName } from '../../lib/lookup';
 
 export default function ShipmentList() {
   const [items, setItems] = React.useState(() => getShipments());
@@ -58,7 +59,10 @@ export default function ShipmentList() {
                 <div>
                   <div><strong>Shipment {s.id.slice(0,8)}</strong> — {s.status}</div>
                   <div style={{ color:'var(--color-muted)', fontSize:12 }}>
-                    Client: {s.clientId} · Carrier: {s.carrier}
+                    Client: <Link to={`/clients/${s.clientId}`} style={{ color:'var(--color-muted)', textDecoration:'none' }}>
+                      {clientName(s.clientId)}
+                    </Link>
+                    {` · Carrier: ${s.carrier}`}
                     {s.tracking ? ` · Tracking: ${s.tracking}` : ''}
                     {' · Created: '}{new Date(s.createdAt).toLocaleString()}
                     {s.shippedAt ? ` · Shipped: ${new Date(s.shippedAt).toLocaleString()}` : ''}

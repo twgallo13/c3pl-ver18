@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { getPurchaseOrders, removePurchaseOrder } from '../../lib/repos/poRepo';
 import { useToast } from '../../components/ui/Toast';
+import { clientName, vendorName } from '../../lib/lookup';
 
 export default function POList() {
   const [items, setItems] = React.useState(() => getPurchaseOrders());
@@ -55,10 +56,16 @@ export default function POList() {
             }}>
               <div style={{ display:'flex', justifyContent:'space-between', gap:'0.5rem' }}>
                 <div>
-                  <div><strong>PO {po.id.slice(0,8)}</strong> — {po.status}</div>
+                  <div>
+                    <strong>PO {po.id.slice(0,8)}</strong> — {po.status}
+                  </div>
                   <div style={{ color:'var(--color-muted)', fontSize:12 }}>
-                    Client: {po.clientId} · Vendor: {po.vendorId} · Lines: {po.lines.length} ·
-                    Created: {new Date(po.createdAt).toLocaleString()}
+                    Client: <Link to={`/clients/${po.clientId}`} style={{ color:'var(--color-muted)', textDecoration:'none' }}>
+                      {clientName(po.clientId)}
+                    </Link>
+                    {' · Vendor: '}{vendorName(po.vendorId)}
+                    {' · Lines: '}{po.lines.length}
+                    {' · Created: '}{new Date(po.createdAt).toLocaleString()}
                     {po.expectedAt ? ` · ETA: ${new Date(po.expectedAt).toLocaleDateString()}` : ''}
                   </div>
                 </div>

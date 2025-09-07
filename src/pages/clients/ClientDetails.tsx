@@ -4,6 +4,8 @@ import Loading from '../../components/ui/Loading';
 import ErrorState from '../../components/ui/ErrorState';
 import EmptyState from '../../components/ui/EmptyState';
 import { getClients } from '../../lib/repos/clientRepo';
+import { getPurchaseOrders } from '../../lib/repos/poRepo';
+import { getShipments } from '../../lib/repos/shipmentRepo';
 
 export default function ClientDetails() {
   const { id } = useParams<{ id: string }>();
@@ -54,6 +56,25 @@ export default function ClientDetails() {
         </div>
         <div style={{ color: 'var(--color-muted)' }}>
           {(client!.contacts?.[0]?.email || 'no email')} · {(client!.contacts?.[0]?.phone || 'no phone')}
+        </div>
+      </div>
+
+      <div style={{ marginTop: '0.75rem',
+        border: '1px solid var(--color-border)', borderRadius: 'var(--radius)',
+        padding: '0.75rem', background: 'rgba(255,255,255,0.03)'
+      }}>
+        <div style={{ display:'flex', gap:'1rem', flexWrap:'wrap' }}>
+          <div>
+            <strong>Related POs: </strong>
+            {getPurchaseOrders().filter(p => p.clientId === client!.id).length}
+          </div>
+          <div>
+            <strong>Related Shipments: </strong>
+            {getShipments().filter(sh => sh.clientId === client!.id).length}
+          </div>
+        </div>
+        <div style={{ color:'var(--color-muted)', fontSize:12, marginTop:'0.25rem' }}>
+          (Lists remain on /po and /shipments; deep filters coming later.)
         </div>
       </div>
     </div>
