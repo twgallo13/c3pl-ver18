@@ -126,7 +126,7 @@ export const routeRegistry: AppRoute[] = [
   {
     path: '/po',
     component: POList,
-    label: 'Purchase Orders',
+    label: 'Inbound',
     icon: '🧾',
     parent: null,
     roles: ['Admin', 'Finance', 'Ops'],
@@ -134,7 +134,7 @@ export const routeRegistry: AppRoute[] = [
   {
     path: '/po/new',
     component: POCreate,
-    label: 'New Purchase Order',
+    label: 'New Inbound',
     icon: '➕',
     parent: '/po',
     roles: ['Admin', 'Finance', 'Ops'],
@@ -142,14 +142,14 @@ export const routeRegistry: AppRoute[] = [
   {
     path: '/po/:id',
     component: PODetails,
-    label: 'PO Details',
+    label: 'Inbound Details',
     parent: '/po',
     roles: ['Admin', 'Finance', 'Ops'],
   },
   {
     path: '/po/:id/edit',
     component: POEdit,
-    label: 'Edit PO',
+    label: 'Edit Inbound',
     parent: '/po',
     roles: ['Admin', 'Finance', 'Ops'],
   },

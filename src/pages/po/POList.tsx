@@ -16,7 +16,7 @@ type Filters = {
 
 export default function POList() {
   const [items, setItems] = React.useState(() => getPurchaseOrders());
-  
+
   // Load persisted filters
   const loadFilters = React.useCallback((): Filters => {
     try {
@@ -29,10 +29,10 @@ export default function POList() {
 
   // Raw filter inputs (responsive to typing)
   const [rawFilters, setRawFilters] = React.useState<Filters>(loadFilters);
-  
+
   // Debounced filters (used for actual filtering)
   const [debouncedFilters, setDebouncedFilters] = React.useState<Filters>(rawFilters);
-  
+
   const { push } = useToast();
 
   // Debounce filter changes (200ms)
@@ -66,7 +66,7 @@ export default function POList() {
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-        <h1 style={{ marginTop: 0 }}>Purchase Orders</h1>
+        <h1 style={{ marginTop: 0 }}>Inbound</h1>
         <Link to="/po/new" style={{
           textDecoration: 'none', border: '1px solid var(--color-border)', borderRadius: 'var(--radius)',
           padding: '0.4rem 0.6rem', color: 'var(--color-fg)'
@@ -122,7 +122,7 @@ export default function POList() {
               expectedAt: po.expectedAt ?? '', lineCount: po.lines.length
             }));
             const csv = toCSV(allRows, ['id', 'clientId', 'vendorId', 'status', 'createdAt', 'expectedAt', 'lineCount']);
-            downloadCSV(`purchase_orders_${new Date().toISOString().slice(0, 10)}.csv`, allRows);
+            downloadCSV("inbound.csv", allRows);
           }}
           style={{
             border: '1px solid var(--color-border)', borderRadius: 'var(--radius)',
@@ -130,7 +130,7 @@ export default function POList() {
             color: 'var(--color-fg)', cursor: 'pointer'
           }}
         >
-          Export CSV
+          Export Inbound
         </button>
         <button
           onClick={resetFilters}
