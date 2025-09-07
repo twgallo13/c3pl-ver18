@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { getClients } from '../../lib/repos/clientRepo';
 
 export default function ClientList() {
@@ -26,7 +27,11 @@ export default function ClientList() {
               padding: '0.5rem',
               marginBottom: '0.5rem'
             }}>
-              <div><strong>{c.name}</strong></div>
+              <div>
+                <Link to={`/clients/${c.id}`} style={{ color: 'var(--color-fg)', textDecoration: 'none' }}>
+                  <strong>{c.name}</strong>
+                </Link>
+              </div>
               <div style={{ color: 'var(--color-muted)', fontSize: 12 }}>
                 {(c.contacts?.[0]?.email || 'no email')} · {(c.contacts?.[0]?.phone || 'no phone')}
               </div>
