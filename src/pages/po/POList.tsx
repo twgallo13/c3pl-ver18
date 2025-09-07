@@ -7,21 +7,21 @@ import { toCSV, downloadCSV } from '../../lib/csv';
 
 export default function POList() {
   const [items, setItems] = React.useState(() => getPurchaseOrders());
-  const [q, setQ] = React.useState('');
+  const [qClient, setQClient] = React.useState('');
+  const [qVendor, setQVendor] = React.useState('');
+  const [status, setStatus] = React.useState('');
   const { push } = useToast();
 
   function refresh() { setItems(getPurchaseOrders()); }
-  const matches = (s: string) => s.toLowerCase().includes(q.trim().toLowerCase());
+  const ci = (s: string, q: string) => s.toLowerCase().includes(q.trim().toLowerCase());
 
-  const filtered = React.useMemo(
-    () => items.filter(po =>
-      matches(po.id) ||
-      matches(po.clientId) ||
-      matches(po.vendorId) ||
-      matches(po.status)
+  const filtered = React.useMemo(() =>
+    items.filter(po =>
+      (qClient ? ci(po.clientId, qClient) : true) &&
+      (qVendor ? ci(po.vendorId, qVendor) : true) &&
+      (status ? po.status === status : true)
     ),
-    [items, q]
-  );
+  [items, qClient, qVendor, status]);
 
   return (
     <div>
@@ -33,13 +33,30 @@ export default function POList() {
         }}>+ New</Link>
       </div>
 
-      <div style={{ display:'flex', gap:'0.5rem', margin:'0.75rem 0' }}>
+      <div style={{ display:'flex', gap:'0.5rem', margin:'0.75rem 0', flexWrap:'wrap' }}>
         <input
-          placeholder="Search by PO id, client id, vendor id, status"
-          value={q} onChange={e => setQ(e.target.value)}
+          placeholder="Client ID"
+          value={qClient} onChange={e => setQClient(e.target.value)}
           style={{ background:'transparent', color:'var(--color-fg)', border:'1px solid var(--color-border)',
-            borderRadius:'var(--radius)', padding:'0.5rem', minWidth:320 }}
+            borderRadius:'var(--radius)', padding:'0.5rem', minWidth:120 }}
         />
+        <input
+          placeholder="Vendor ID"
+          value={qVendor} onChange={e => setQVendor(e.target.value)}
+          style={{ background:'transparent', color:'var(--color-fg)', border:'1px solid var(--color-border)',
+            borderRadius:'var(--radius)', padding:'0.5rem', minWidth:120 }}
+        />
+        <select 
+          value={status} 
+          onChange={e => setStatus(e.target.value)}
+          style={{ background:'transparent', color:'var(--color-fg)', border:'1px solid var(--color-border)',
+            borderRadius:'var(--radius)', padding:'0.45rem 0.5rem' }}
+        >
+          <option value="" style={{ color:'black' }}>All statuses</option>
+          {['Draft','Submitted','Received','Closed','Canceled'].map(s=>
+            <option key={s} value={s} style={{ color:'black' }}>{s}</option>
+          )}
+        </select>
         <button onClick={refresh} style={{
           border:'1px solid var(--color-border)', borderRadius:'var(--radius)',
           padding:'0.5rem 0.75rem', background:'transparent', color:'var(--color-fg)', cursor:'pointer'
@@ -87,7 +104,10 @@ export default function POList() {
                   </div>
                 </div>
                 <div style={{ display:'flex', gap:'0.5rem' }}>
-                  <button onClick={() => { removePurchaseOrder(po.id); refresh(); push({ text: 'Purchase Order deleted', kind: 'success' }); }} style={{
+                  <button onClick={() => { 
+                    if (!confirm('Delete this purchase order?')) return;
+                    removePurchaseOrder(po.id); refresh(); push({ text: 'Purchase Order deleted', kind: 'success' }); 
+                  }} style={{
                     border:'1px solid var(--color-border)', borderRadius:'var(--radius)',
                     padding:'0.35rem 0.6rem', background:'transparent', color:'var(--color-fg)', cursor:'pointer'
                   }}>Delete</button>

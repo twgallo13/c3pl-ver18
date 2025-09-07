@@ -7,22 +7,21 @@ import { toCSV, downloadCSV } from '../../lib/csv';
 
 export default function ShipmentList() {
   const [items, setItems] = React.useState(() => getShipments());
-  const [q, setQ] = React.useState('');
+  const [qCarrier, setQCarrier] = React.useState('');
+  const [qTrack, setQTrack] = React.useState('');
+  const [status, setStatus] = React.useState('');
   const { push } = useToast();
 
   function refresh() { setItems(getShipments()); }
-  const matches = (s: string) => s.toLowerCase().includes(q.trim().toLowerCase());
+  const ci = (s: string, q: string) => s.toLowerCase().includes(q.trim().toLowerCase());
 
-  const filtered = React.useMemo(
-    () => items.filter(s =>
-      matches(s.id) ||
-      matches(s.clientId) ||
-      matches(s.carrier) ||
-      matches(s.status) ||
-      matches(s.tracking || '')
+  const filtered = React.useMemo(() =>
+    items.filter(s =>
+      (qCarrier ? ci(s.carrier, qCarrier) : true) &&
+      (qTrack ? ci(s.tracking ?? '', qTrack) : true) &&
+      (status ? s.status === status : true)
     ),
-    [items, q]
-  );
+  [items, qCarrier, qTrack, status]);
 
   return (
     <div>
@@ -34,13 +33,30 @@ export default function ShipmentList() {
         }}>+ New</Link>
       </div>
 
-      <div style={{ display:'flex', gap:'0.5rem', margin:'0.75rem 0' }}>
+      <div style={{ display:'flex', gap:'0.5rem', margin:'0.75rem 0', flexWrap:'wrap' }}>
         <input
-          placeholder="Search by id, client id, carrier, status, tracking"
-          value={q} onChange={e => setQ(e.target.value)}
+          placeholder="Carrier"
+          value={qCarrier} onChange={e => setQCarrier(e.target.value)}
           style={{ background:'transparent', color:'var(--color-fg)', border:'1px solid var(--color-border)',
-            borderRadius:'var(--radius)', padding:'0.5rem', minWidth:320 }}
+            borderRadius:'var(--radius)', padding:'0.5rem', minWidth:120 }}
         />
+        <input
+          placeholder="Tracking"
+          value={qTrack} onChange={e => setQTrack(e.target.value)}
+          style={{ background:'transparent', color:'var(--color-fg)', border:'1px solid var(--color-border)',
+            borderRadius:'var(--radius)', padding:'0.5rem', minWidth:120 }}
+        />
+        <select 
+          value={status} 
+          onChange={e => setStatus(e.target.value)}
+          style={{ background:'transparent', color:'var(--color-fg)', border:'1px solid var(--color-border)',
+            borderRadius:'var(--radius)', padding:'0.45rem 0.5rem' }}
+        >
+          <option value="" style={{ color:'black' }}>All statuses</option>
+          {['Pending','Packed','Shipped','Delivered','Exception'].map(s=>
+            <option key={s} value={s} style={{ color:'black' }}>{s}</option>
+          )}
+        </select>
         <button onClick={refresh} style={{
           border:'1px solid var(--color-border)', borderRadius:'var(--radius)',
           padding:'0.5rem 0.75rem', background:'transparent', color:'var(--color-fg)', cursor:'pointer'
@@ -87,7 +103,10 @@ export default function ShipmentList() {
                   </div>
                 </div>
                 <div style={{ display:'flex', gap:'0.5rem' }}>
-                  <button onClick={() => { removeShipment(s.id); refresh(); push({ text: 'Shipment deleted', kind: 'success' }); }} style={{
+                  <button onClick={() => { 
+                    if (!confirm('Delete this shipment?')) return;
+                    removeShipment(s.id); refresh(); push({ text: 'Shipment deleted', kind: 'success' }); 
+                  }} style={{
                     border:'1px solid var(--color-border)', borderRadius:'var(--radius)',
                     padding:'0.35rem 0.6rem', background:'transparent', color:'var(--color-fg)', cursor:'pointer'
                   }}>Delete</button>

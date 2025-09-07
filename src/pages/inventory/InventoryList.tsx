@@ -6,18 +6,21 @@ import { toCSV, downloadCSV } from '../../lib/csv';
 
 export default function InventoryList() {
   const [items, setItems] = React.useState(() => getInventory());
-  const [q, setQ] = React.useState('');
+  const [qSku, setQSku] = React.useState('');
+  const [qName, setQName] = React.useState('');
+  const [qLoc, setQLoc] = React.useState('');
   const { push } = useToast();
 
   function refresh() { setItems(getInventory()); }
-  function matches(s: string) { return s.toLowerCase().includes(q.trim().toLowerCase()); }
+  const ci = (s: string, q: string) => s.toLowerCase().includes(q.trim().toLowerCase());
 
-  const filtered = React.useMemo(
-    () => items.filter(i =>
-      matches(i.sku) || matches(i.name) || matches(i.location || '') || matches(i.upc || '')
-    ),
-    [items, q]
-  );
+  const filtered = React.useMemo(() => {
+    return items.filter(i =>
+      (qSku ? ci(i.sku ?? '', qSku) : true) &&
+      (qName ? ci(i.name ?? '', qName) : true) &&
+      (qLoc ? ci(i.location ?? '', qLoc) : true)
+    );
+  }, [items, qSku, qName, qLoc]);
 
   return (
     <div>
@@ -28,13 +31,27 @@ export default function InventoryList() {
           padding:'0.4rem 0.6rem', color:'var(--color-fg)' }}>+ New</Link>
       </div>
 
-      <div style={{ display:'flex', gap:'0.5rem', margin:'0.75rem 0' }}>
+      <div style={{ display:'flex', gap:'0.5rem', margin:'0.75rem 0', flexWrap:'wrap' }}>
         <input
-          placeholder="Search by SKU, name, UPC, location"
-          value={q}
-          onChange={e => setQ(e.target.value)}
+          placeholder="SKU"
+          value={qSku}
+          onChange={e => setQSku(e.target.value)}
           style={{ background:'transparent', color:'var(--color-fg)',
-            border:'1px solid var(--color-border)', borderRadius:'var(--radius)', padding:'0.5rem', minWidth:280 }}
+            border:'1px solid var(--color-border)', borderRadius:'var(--radius)', padding:'0.5rem', minWidth:120 }}
+        />
+        <input
+          placeholder="Name"
+          value={qName}
+          onChange={e => setQName(e.target.value)}
+          style={{ background:'transparent', color:'var(--color-fg)',
+            border:'1px solid var(--color-border)', borderRadius:'var(--radius)', padding:'0.5rem', minWidth:120 }}
+        />
+        <input
+          placeholder="Location"
+          value={qLoc}
+          onChange={e => setQLoc(e.target.value)}
+          style={{ background:'transparent', color:'var(--color-fg)',
+            border:'1px solid var(--color-border)', borderRadius:'var(--radius)', padding:'0.5rem', minWidth:120 }}
         />
         <button onClick={refresh} style={{
           border:'1px solid var(--color-border)', borderRadius:'var(--radius)',
@@ -76,7 +93,10 @@ export default function InventoryList() {
                 </div>
                 <div style={{ display:'flex', gap:'0.5rem' }}>
                   {/* Future: edit route */}
-                  <button onClick={() => { removeInventoryItem(i.id); refresh(); push({ text: 'Inventory item deleted', kind: 'success' }); }} style={{
+                  <button onClick={() => { 
+                    if (!confirm('Delete this inventory item?')) return;
+                    removeInventoryItem(i.id); refresh(); push({ text: 'Inventory item deleted', kind: 'success' }); 
+                  }} style={{
                     border:'1px solid var(--color-border)', borderRadius:'var(--radius)',
                     padding:'0.35rem 0.6rem', background:'transparent', color:'var(--color-fg)', cursor:'pointer'
                   }}>Delete</button>
