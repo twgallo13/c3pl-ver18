@@ -5,6 +5,7 @@
 
 import React from 'react';
 import DemoForm from '@/pages/demo/DemoForm';
+import DemoClient from '@/pages/demo/DemoClient';
 
 const FinanceDashboard: React.FC = () => <div>Finance Dashboard Placeholder</div>;
 
@@ -25,7 +26,7 @@ export interface AppRoute {
 export const routeRegistry: AppRoute[] = [
   {
     path: '/finance',
-    component: FinanceDashboard,
+    component: DemoClient,
     label: 'Finance',
     icon: '💰',
     parent: null,
