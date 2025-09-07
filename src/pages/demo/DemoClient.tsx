@@ -1,13 +1,19 @@
 import React from 'react';
-import Loading from '@/components/ui/Loading';
-import ErrorState from '@/components/ui/ErrorState';
-import EmptyState from '@/components/ui/EmptyState';
-import { fetchDemoProfile } from '@/lib/services/demoService';
+import Loading from '../../components/ui/Loading';
+import ErrorState from '../../components/ui/ErrorState';
+import EmptyState from '../../components/ui/EmptyState';
+import { fetchDemoProfile } from '../../lib/services/demoService';
 
 export default function DemoClient() {
   const [status, setStatus] = React.useState<'idle'|'loading'|'error'|'ready'>('idle');
   const [error, setError] = React.useState<string|undefined>(undefined);
   const [data, setData] = React.useState<any>(null);
+
+  React.useEffect(() => {
+    // auto-load so the page shows data immediately
+    load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   async function load() {
     setStatus('loading');

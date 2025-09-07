@@ -1,6 +1,6 @@
 // Minimal mock "API" that still uses Zod for validation, no network required.
 import { z } from 'zod';
-import { validate } from '@/lib/contracts';
+import { validate } from '../contracts';
 
 // Define a tiny response contract (re-usable pattern)
 export const DemoProfile = z.object({
