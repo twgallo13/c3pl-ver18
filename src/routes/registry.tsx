@@ -14,6 +14,8 @@ import InventoryList from '../pages/inventory/InventoryList';
 import InventoryCreate from '../pages/inventory/InventoryCreate';
 import POList from '../pages/po/POList';
 import POCreate from '../pages/po/POCreate';
+import ShipmentList from '../pages/shipments/ShipmentList';
+import ShipmentCreate from '../pages/shipments/ShipmentCreate';
 
 const FinanceDashboard: React.FC = () => <div>Finance Dashboard Placeholder</div>;
 
@@ -111,6 +113,22 @@ export const routeRegistry: AppRoute[] = [
     icon: '➕',
     parent: '/po',
     roles: ['Admin', 'Finance', 'Ops'],
+  },
+  {
+    path: '/shipments',
+    component: ShipmentList,
+    label: 'Shipments',
+    icon: '🚚',
+    parent: null,
+    roles: ['Admin', 'Ops', 'WarehouseManager', 'WarehouseStaff', 'CS'],
+  },
+  {
+    path: '/shipments/new',
+    component: ShipmentCreate,
+    label: 'New Shipment',
+    icon: '➕',
+    parent: '/shipments',
+    roles: ['Admin', 'Ops', 'WarehouseManager'],
   },
 ];
 
