@@ -123,7 +123,7 @@ export default function ShipmentList() {
               lineCount: s.lines.length
             }));
             const csv = toCSV(allRows, ['id', 'clientId', 'carrier', 'tracking', 'status', 'createdAt', 'shippedAt', 'lineCount']);
-            downloadCSV(`shipments_${new Date().toISOString().slice(0, 10)}.csv`, csv);
+            downloadCSV(`shipments_${new Date().toISOString().slice(0, 10)}.csv`, allRows);
           }}
           style={{
             border: '1px solid var(--color-border)', borderRadius: 'var(--radius)',

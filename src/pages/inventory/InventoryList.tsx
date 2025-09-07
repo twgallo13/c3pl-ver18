@@ -119,7 +119,7 @@ export default function InventoryList() {
               qtyAllocated: i.qtyAllocated, location: i.location ?? ''
             }));
             const csv = toCSV(allRows, ['id', 'sku', 'name', 'upc', 'qtyOnHand', 'qtyAllocated', 'location']);
-            downloadCSV(`inventory_${new Date().toISOString().slice(0, 10)}.csv`, csv);
+            downloadCSV(`inventory_${new Date().toISOString().slice(0, 10)}.csv`, allRows);
           }}
           style={{
             border: '1px solid var(--color-border)', borderRadius: 'var(--radius)',

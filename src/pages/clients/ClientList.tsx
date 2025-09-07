@@ -79,7 +79,7 @@ export default function ClientList() {
       status: c.status,
       createdAt: c.createdAt ? new Date(c.createdAt).toISOString() : "",
     }));
-    downloadCSV(rows, "clients.csv");
+    downloadCSV("clients.csv", rows);
   };
 
   return (
