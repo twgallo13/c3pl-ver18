@@ -1,3 +1,5 @@
+import { Button } from "../../components/ui/button";
+import EmptyState from "./EmptyState";
 import React from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { z } from 'zod';
@@ -37,39 +39,34 @@ export default function ClientEdit() {
     // Transform the edit shape back to the stored client format
     if (!f.validate()) return;
     const values = f.values;
-
-    const next = {
-      id: values.id,
-      name: values.name,
-      billingAddress: client?.billingAddress,
-      shippingAddress: client?.shippingAddress,
-      contacts: (values.email || values.phone)
-        ? [{ name: values.name, email: values.email || undefined, phone: values.phone || undefined }]
-        : [],
-      status: client?.status ?? 'Active',
-    };
-
-    upsertClient(next as any);
-    push({ text: 'Client updated', kind: 'success' });
-    nav(`/clients/${values.id}`);
+    try {
+      const next = {
+        id: values.id,
+        name: values.name,
+        billingAddress: client?.billingAddress,
+        shippingAddress: client?.shippingAddress,
+        contacts: (values.email || values.phone)
+          ? [{ name: values.name, email: values.email || undefined, phone: values.phone || undefined }]
+          : [],
+        status: client?.status ?? 'Active',
+      };
+      upsertClient(next as any);
+      push({ text: 'Client updated', kind: 'success' });
+      nav(`/clients/${values.id}`);
+    } catch {
+      push({ text: 'Something went wrong' });
+    }
   }
 
   if (!client) {
-    return (
-      <div>
-        <h1 style={{ marginTop: 0 }}>Client not found</h1>
-        <p style={{ color: 'var(--color-muted)' }}>
-          The requested client does not exist. <Link to="/clients" style={{ color: 'var(--color-muted)', textDecoration: 'none' }}>← Back to Clients</Link>
-        </p>
-      </div>
-    );
+    return <EmptyState title="Client not found" subtitle="It may have been deleted or the link is incorrect." />;
   }
 
   return (
     <div style={{ maxWidth: 560 }}>
-      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'baseline' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
         <h1 style={{ marginTop: 0 }}>Edit Client</h1>
-        <Link to={`/clients/${client.id}`} style={{ color: 'var(--color-muted)', textDecoration:'none' }}>← Cancel</Link>
+        <Link to={`/clients/${client.id}`} style={{ color: 'var(--color-muted)', textDecoration: 'none' }}>← Cancel</Link>
       </div>
 
       <form onSubmit={e => { e.preventDefault(); }}>
@@ -108,27 +105,21 @@ export default function ClientEdit() {
           />
         </FormField>
 
-        <div style={{ display:'flex', gap:'0.5rem', marginTop:'0.75rem' }}>
-          <button
+        <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.75rem' }}>
+          <Button
             type="button"
             onClick={save}
             disabled={!z.object(EditClientSchema.shape).safeParse(f.values).success}
-            style={{
-              border: '1px solid var(--color-border)', borderRadius: 'var(--radius)',
-              padding: '0.5rem 0.75rem', background: 'var(--color-accent)', color: 'white', cursor: 'pointer'
-            }}
           >
             Save
-          </button>
-          <Link
-            to={`/clients/${client.id}`}
-            style={{
-              border: '1px solid var(--color-border)', borderRadius: 'var(--radius)',
-              padding: '0.5rem 0.75rem', background: 'transparent', color: 'var(--color-fg)', textDecoration:'none'
-            }}
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={() => nav(`/clients/${client.id}`)}
           >
             Cancel
-          </Link>
+          </Button>
         </div>
       </form>
     </div>

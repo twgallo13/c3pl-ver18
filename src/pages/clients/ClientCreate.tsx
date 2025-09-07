@@ -34,26 +34,28 @@ export default function ClientCreate() {
   async function save() {
     if (!f.validate()) return;
     const values = f.values;
-
-    const client = {
-      id: values.id,
-      name: values.name,
-      billingAddress: undefined,
-      shippingAddress: undefined,
-      contacts: (values.email || values.phone)
-        ? [{ name: values.name, email: values.email || undefined, phone: values.phone || undefined }]
-        : [],
-      status: 'Active' as const,
-    };
-
-    upsertClient(client as any);
-    push({ text: 'Client created successfully', kind: 'success' });
-    nav('/clients');
+    try {
+      const client = {
+        id: values.id,
+        name: values.name,
+        billingAddress: undefined,
+        shippingAddress: undefined,
+        contacts: (values.email || values.phone)
+          ? [{ name: values.name, email: values.email || undefined, phone: values.phone || undefined }]
+          : [],
+        status: 'Active' as const,
+      };
+      upsertClient(client as any);
+      push({ text: 'Client added', kind: 'success' });
+      nav('/clients');
+    } catch {
+      push({ text: 'Something went wrong' });
+    }
   }
 
   return (
     <div style={{ maxWidth: 560 }}>
-      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'baseline', marginBottom: '1rem' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '1rem' }}>
         <h1 style={{ marginTop: 0 }}>Create New Client</h1>
         <Link to="/clients" style={{ color: 'var(--color-muted)', textDecoration: 'none' }}>← Back to Clients</Link>
       </div>
@@ -97,7 +99,7 @@ export default function ClientCreate() {
           />
         </FormField>
 
-        <div style={{ display:'flex', gap:'0.5rem', marginTop:'0.75rem' }}>
+        <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.75rem' }}>
           <Button
             type="button"
             onClick={save}
@@ -105,9 +107,9 @@ export default function ClientCreate() {
           >
             Create Client
           </Button>
-          <Button 
+          <Button
             type="button"
-            variant="ghost" 
+            variant="ghost"
             onClick={() => nav('/clients')}
           >
             Cancel

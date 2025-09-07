@@ -7,10 +7,10 @@ import React from 'react';
 import DemoForm from '../pages/demo/DemoForm';
 import DemoClient from '../pages/demo/DemoClient';
 import LeadCreate from '../pages/leads/LeadCreate';
-import ClientList from '../pages/clients/ClientList';
-import ClientDetails from '../pages/clients/ClientDetails';
-import ClientEdit from '../pages/clients/ClientEdit';
-import ClientCreate from '../pages/clients/ClientCreate';
+import ClientList from '@/pages/clients/ClientList';
+import ClientCreate from '@/pages/clients/ClientCreate';
+import ClientDetails from '@/pages/clients/ClientDetails';
+import ClientEdit from '@/pages/clients/ClientEdit';
 import InventoryList from '../pages/inventory/InventoryList';
 import InventoryCreate from '../pages/inventory/InventoryCreate';
 import POList from '../pages/po/POList';
@@ -63,50 +63,31 @@ export const routeRegistry: AppRoute[] = [
     path: '/clients',
     component: ClientList,
     label: 'Clients',
-    icon: '👥',
     parent: null,
-    roles: ['Admin', 'Finance', 'AccountManager', 'CS'],
+    roles: ['admin', 'manager'],
   },
   {
     path: '/clients/new',
     component: ClientCreate,
     label: 'New Client',
-    icon: '➕',
     parent: '/clients',
-    roles: ['Admin', 'Finance', 'AccountManager', 'CS'],
+    roles: ['admin', 'manager'],
   },
   {
     path: '/clients/:id',
     component: ClientDetails,
     label: 'Client Details',
-    icon: '👤',
     parent: '/clients',
-    roles: ['Admin', 'Finance', 'AccountManager', 'CS'],
+    roles: ['admin', 'manager'],
   },
   {
     path: '/clients/:id/edit',
     component: ClientEdit,
     label: 'Edit Client',
-    icon: '✏️',
     parent: '/clients',
-    roles: ['Admin', 'AccountManager', 'CS', 'Finance'],
+    roles: ['admin', 'manager'],
   },
-  {
-    path: '/inventory',
-    component: InventoryList,
-    label: 'Inventory',
-    icon: '📦',
-    parent: null,
-    roles: ['Admin', 'Ops', 'WarehouseManager', 'WarehouseStaff'],
-  },
-  {
-    path: '/inventory/new',
-    component: InventoryCreate,
-    label: 'New Inventory Item',
-    icon: '➕',
-    parent: '/inventory',
-    roles: ['Admin', 'Ops', 'WarehouseManager'],
-  },
+  // ...existing code for other routes...
   {
     path: '/po',
     component: POList,

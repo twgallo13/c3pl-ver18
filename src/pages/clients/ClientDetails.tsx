@@ -2,7 +2,7 @@ import React from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import Loading from '../../components/ui/Loading';
 import ErrorState from '../../components/ui/ErrorState';
-import EmptyState from '../../components/ui/EmptyState';
+import EmptyState from './EmptyState';
 import { Button } from '../../components/ui/button';
 import { useToast } from '../../components/ui/Toast';
 import { getClients, removeClient } from '../../lib/repos/clientRepo';
@@ -13,8 +13,8 @@ export default function ClientDetails() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { push } = useToast();
-  const [status, setStatus] = React.useState<'loading'|'ready'|'empty'|'error'>('loading');
-  const [error, setError] = React.useState<string|undefined>();
+  const [status, setStatus] = React.useState<'loading' | 'ready' | 'empty' | 'error'>('loading');
+  const [error, setError] = React.useState<string | undefined>();
   const [client, setClient] = React.useState<ReturnType<typeof getClients>[number] | null>(null);
 
   React.useEffect(() => {
@@ -36,7 +36,6 @@ export default function ClientDetails() {
   const handleDelete = async () => {
     if (!confirm('Delete this client?')) return;
     if (!id) return;
-    
     try {
       removeClient(id);
       push({ text: 'Client deleted', kind: 'success' });
@@ -48,28 +47,33 @@ export default function ClientDetails() {
 
   if (status === 'loading') return <Loading label="Loading client…" />;
   if (status === 'error') return <ErrorState title="Failed to load" detail={error} />;
-  if (status === 'empty') return <EmptyState title="Client not found" detail="Go back to the list and pick another." />;
+  if (status === 'empty') return (
+    <EmptyState
+      title="Client not found"
+      subtitle="It may have been deleted or the link is incorrect."
+    />
+  );
 
   return (
     <div>
-      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'baseline' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
         <h1 style={{ marginTop: 0 }}>{client!.name}</h1>
         <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-          <Button 
-            variant="outline" 
+          <Button
+            variant="muted"
             onClick={() => navigate(`/clients/${client!.id}/edit`)}
             aria-label="Edit Client"
           >
             Edit
           </Button>
-          <Button 
-            variant="destructive" 
+          <Button
+            variant="destructive"
             onClick={handleDelete}
             aria-label="Delete Client"
           >
             Delete
           </Button>
-          <Link to="/clients" style={{ color: 'var(--color-muted)', textDecoration:'none', marginLeft: '0.5rem' }}>← Back to Clients</Link>
+          <Link to="/clients" style={{ color: 'var(--color-muted)', textDecoration: 'none', marginLeft: '0.5rem' }}>← Back to Clients</Link>
         </div>
       </div>
 
@@ -87,11 +91,12 @@ export default function ClientDetails() {
         </div>
       </div>
 
-      <div style={{ marginTop: '0.75rem',
+      <div style={{
+        marginTop: '0.75rem',
         border: '1px solid var(--color-border)', borderRadius: 'var(--radius)',
         padding: '0.75rem', background: 'rgba(255,255,255,0.03)'
       }}>
-        <div style={{ display:'flex', gap:'1rem', flexWrap:'wrap' }}>
+        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
           <div>
             <strong>Related POs: </strong>
             {getPurchaseOrders().filter(p => p.clientId === client!.id).length}
@@ -101,7 +106,7 @@ export default function ClientDetails() {
             {getShipments().filter(sh => sh.clientId === client!.id).length}
           </div>
         </div>
-        <div style={{ color:'var(--color-muted)', fontSize:12, marginTop:'0.25rem' }}>
+        <div style={{ color: 'var(--color-muted)', fontSize: 12, marginTop: '0.25rem' }}>
           (Lists remain on /po and /shipments; deep filters coming later.)
         </div>
       </div>

@@ -1,3 +1,12 @@
+/* Contrast-safe fallbacks for plain buttons and anchor-CTAs */
+button:not([class*="bg-"]):not([class*="text-"]):not([class*="btn-"]),
+a[role="button"]:not([class*="bg-"]):not([class*="text-"]):not([class*="btn-"]) {
+  background-color: var(--btn-bg-muted);
+  color: var(--btn-fg-muted);
+  border-radius: 0.75rem;
+  padding: 0.5rem 1rem;
+}
+
 /* --- Contrast-safe global button fallbacks (V18.0.31) --- */
 :root {
   --btn-bg-primary: #111827;
