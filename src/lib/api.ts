@@ -46,8 +46,7 @@ async function request<T extends z.ZodTypeAny>(
     return parsed.data;
   }
 
-  // @ts-expect-error if caller didn't pass schema
-  return data;
+  return data as z.infer<T>;
 }
 
 // Convenience helpers

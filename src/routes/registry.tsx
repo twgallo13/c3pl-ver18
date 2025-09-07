@@ -2,12 +2,11 @@
 
 // NOTE: Component imports are placeholders for the actual pages.
 // import { FinanceDashboard } from '@/pages/finance/FinanceDashboard';
-// import { ProductsView } from '@/pages/products/ProductsView';
 
 import React from 'react';
+import DemoForm from '@/pages/demo/DemoForm';
 
 const FinanceDashboard: React.FC = () => <div>Finance Dashboard Placeholder</div>;
-const ProductsView: React.FC = () => <div>Products View Placeholder</div>;
 
 export interface AppRoute {
   path: string;
@@ -34,7 +33,7 @@ export const routeRegistry: AppRoute[] = [
   },
   {
     path: '/products',
-    component: ProductsView,
+    component: DemoForm,
     label: 'Products',
     icon: '📦',
     parent: null,
