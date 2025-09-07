@@ -4,7 +4,7 @@ import { z } from 'zod';
 import { useZodForm } from '../../lib/forms/useZodForm';
 import FormField from '../../components/ui/FormField';
 import { Button } from '../../components/ui/button';
-import { upsertClient } from '../../lib/repos/clientRepo';
+import { createClient } from '../../lib/repos/clientRepo';
 import { useToast } from '../../components/ui/Toast';
 
 // A minimal client creation schema
@@ -35,7 +35,7 @@ export default function ClientCreate() {
     if (!f.validate()) return;
     const values = f.values;
     try {
-      const client = {
+      await createClient({
         id: values.id,
         name: values.name,
         billingAddress: undefined,
@@ -43,9 +43,12 @@ export default function ClientCreate() {
         contacts: (values.email || values.phone)
           ? [{ name: values.name, email: values.email || undefined, phone: values.phone || undefined }]
           : [],
-        status: 'Active' as const,
-      };
-      upsertClient(client as any);
+        status: 'Active',
+        email: values.email,
+        phone: values.phone,
+        notes: '',
+        createdAt: Date.now(),
+      });
       push({ text: 'Client added', kind: 'success' });
       nav('/clients');
     } catch {
