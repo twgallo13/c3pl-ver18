@@ -1,182 +1,194 @@
-import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { getAll, Client } from '../../lib/repos/clientRepo';
-import { Button } from '../../components/ui/button';
-import EmptyState from './EmptyState';
-import { includes } from '../../lib/filters';
-import { toCSV, downloadCSV } from '../../lib/csv';
-import { useToast } from '../../components/ui/Toast';
+import { useEffect, useMemo, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { includes } from "../../lib/filters";
+import { getAll, type Client } from "../../lib/repos/clientRepo";
+import { Button } from "../../components/ui/button";
+import { downloadCSV } from "../../lib/csv";
 
-const STORAGE_KEY = 'filters.clients';
+type SortKey = "name-asc" | "name-desc" | "created-asc" | "created-desc";
+const LS_KEY = "filters.clients";
 
-type SortKey = 'name-asc' | 'name-desc' | 'created-asc' | 'created-desc';
+function readPersisted() {
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    if (!raw) return { query: "", sortKey: "created-desc" as SortKey };
+    const parsed = JSON.parse(raw);
+    return {
+      query: typeof parsed.query === "string" ? parsed.query : "",
+      sortKey: (["name-asc","name-desc","created-asc","created-desc"].includes(parsed.sortKey)
+        ? parsed.sortKey
+        : "created-desc") as SortKey,
+    };
+  } catch {
+    return { query: "", sortKey: "created-desc" as SortKey };
+  }
+}
 
-type ClientFilters = {
-  query: string;
-  sortKey: SortKey;
+function persist(state: { query: string; sortKey: SortKey }) {
+  localStorage.setItem(LS_KEY, JSON.stringify(state));
+}
+
+const n = (v?: number) => (typeof v === "number" ? v : 0);
+
+const sorters: Record<SortKey, (a: Client, b: Client) => number> = {
+  "name-asc": (a, b) => a.name.localeCompare(b.name),
+  "name-desc": (a, b) => b.name.localeCompare(a.name),
+  "created-asc": (a, b) => n(a.createdAt) - n(b.createdAt),
+  "created-desc": (a, b) => n(b.createdAt) - n(a.createdAt),
 };
 
 export default function ClientList() {
-  const [clients, setClients] = React.useState(() => getAll());
-  const navigate = useNavigate();
-  const { push } = useToast();
+  const nav = useNavigate();
+  const all: Client[] = getAll(); // source of truth (used for CSV, unfiltered)
+  const [{ query, sortKey }, setState] = useState(readPersisted());
+  const [debouncedQuery, setDebouncedQuery] = useState(query);
 
-  // Load persisted filters
-  const loadFilters = React.useCallback((): ClientFilters => {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      return stored ? JSON.parse(stored) : { query: '', sortKey: 'created-desc' as SortKey };
-    } catch {
-      return { query: '', sortKey: 'created-desc' as SortKey };
-    }
-  }, []);
+  // Debounce query
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedQuery(query), 200);
+    return () => clearTimeout(t);
+  }, [query]);
 
-  // Raw filter inputs (responsive to typing)
-  const [rawFilters, setRawFilters] = React.useState<ClientFilters>(loadFilters);
+  // Persist on changes
+  useEffect(() => {
+    persist({ query, sortKey });
+  }, [query, sortKey]);
 
-  // Debounced filters (used for actual filtering)
-  const [debouncedFilters, setDebouncedFilters] = React.useState<ClientFilters>(rawFilters);
+  const filtered = useMemo(() => {
+    if (!debouncedQuery) return all;
+    return all.filter((c) =>
+      includes(c.name, debouncedQuery) ||
+      includes(c.email, debouncedQuery) ||
+      includes(c.phone, debouncedQuery) ||
+      includes(c.contacts?.[0]?.email, debouncedQuery) ||
+      includes(c.contacts?.[0]?.phone, debouncedQuery)
+    );
+  }, [all, debouncedQuery]);
 
-  // Debounce filter changes (200ms)
-  React.useEffect(() => {
-    const timeout = setTimeout(() => {
-      setDebouncedFilters(rawFilters);
-      // Persist to localStorage
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(rawFilters));
-    }, 200);
+  const shown = useMemo(() => {
+    return [...filtered].sort(sorters[sortKey]);
+  }, [filtered, sortKey]);
 
-    return () => clearTimeout(timeout);
-  }, [rawFilters]);
-
-  // In a later prompt we might add events or a bus; for now manual refresh
-  function refresh() {
-    setClients(getAll());
-  }
-
-  // Filter clients by search query
-  const filteredClients = React.useMemo(() => {
-    if (!debouncedFilters.query.trim()) return clients;
-
-    return clients.filter(client => {
-      return includes(client.name, debouncedFilters.query) ||
-        includes(client.contacts?.[0]?.email, debouncedFilters.query) ||
-        includes(client.contacts?.[0]?.phone, debouncedFilters.query);
-    });
-  }, [clients, debouncedFilters.query]);
-
-  // Sort clients
-  const sortedClients = React.useMemo(() => {
-    const n = (v?: number) => (typeof v === "number" ? v : 0);
-    const sorters = {
-      "name-asc": (a: Client, b: Client) => a.name.localeCompare(b.name),
-      "name-desc": (a: Client, b: Client) => b.name.localeCompare(a.name),
-      "created-asc": (a: Client, b: Client) => n(a.createdAt) - n(b.createdAt),
-      "created-desc": (a: Client, b: Client) => n(b.createdAt) - n(a.createdAt),
-    } as const;
-    return [...filteredClients].sort(sorters[debouncedFilters.sortKey]);
-  }, [filteredClients, debouncedFilters.sortKey]);
-
-  function exportCSV() {
-    const rows = getAll().map(c => ({
+  const exportCSV = () => {
+    // Always export the FULL, UNFILTERED dataset
+    const rows = all.map((c) => ({
       id: c.id,
       name: c.name,
-      email: c.contacts?.[0]?.email ?? '',
-      phone: c.contacts?.[0]?.phone ?? '',
+      email: c.email ?? c.contacts?.[0]?.email ?? "",
+      phone: c.phone ?? c.contacts?.[0]?.phone ?? "",
       status: c.status,
-      createdAt: c.createdAt ?? ''
+      createdAt: c.createdAt ? new Date(c.createdAt).toISOString() : "",
     }));
-    const csv = toCSV(rows, ['id', 'name', 'email', 'phone', 'status', 'createdAt']);
-    downloadCSV(`clients_${new Date().toISOString().slice(0, 10)}.csv`, csv);
-    push({ text: 'Client list exported', kind: 'success' });
-  }
+    downloadCSV(rows, "clients.csv");
+  };
 
   return (
-    <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '1rem' }}>
-        <h1 style={{ marginTop: 0 }}>Clients</h1>
-        <Button variant="primary" onClick={() => navigate('/clients/new')} aria-label="Add Client">
-          Add Client
-        </Button>
-      </div>
-
-      {/* Search and Sort Controls */}
-      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.75rem', flexWrap: 'wrap', alignItems: 'center' }}>
-        <input
-          placeholder="Search clients..."
-          value={rawFilters.query}
-          onChange={e => setRawFilters(prev => ({ ...prev, query: e.target.value }))}
-          onKeyDown={e => { if (e.key === 'Enter') e.preventDefault(); }}
-          aria-label="Search clients"
-          style={{
-            background: 'transparent',
-            color: 'var(--color-fg)',
-            border: '1px solid var(--color-border)',
-            borderRadius: 'var(--radius)',
-            padding: '0.5rem',
-            minWidth: '240px'
-          }}
-        />
-        <select
-          value={rawFilters.sortKey}
-          onChange={e => setRawFilters(prev => ({ ...prev, sortKey: e.target.value as SortKey }))}
-          aria-label="Sort clients"
-          style={{
-            background: 'transparent',
-            color: 'var(--color-fg)',
-            border: '1px solid var(--color-border)',
-            borderRadius: 'var(--radius)',
-            padding: '0.45rem 0.5rem'
-          }}
-        >
-          <option value="name-asc" style={{ color: 'black' }}>Name ↑</option>
-          <option value="name-desc" style={{ color: 'black' }}>Name ↓</option>
-          <option value="created-asc" style={{ color: 'black' }}>Created ↑</option>
-          <option value="created-desc" style={{ color: 'black' }}>Created ↓</option>
-        </select>
-      </div>
-
-      <p style={{ color: 'var(--color-muted)' }}>
-        Showing {sortedClients.length} of {clients.length} client{clients.length === 1 ? '' : 's'} (local demo).
-      </p>
-
-      {sortedClients.length === 0 ? (
-        clients.length === 0 ? (
-          <EmptyState title="No clients yet" subtitle="Add your first client to get started." showAdd />
-        ) : (
-          <p style={{ color: 'var(--color-muted)', textAlign: 'center', padding: '2rem' }}>
-            No clients match your search.
-          </p>
-        )
-      ) : (
-        <ul style={{ listStyle: 'none', padding: 0 }}>
-          {sortedClients.map(c => (
-            <li key={c.id} style={{
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h1 className="text-xl font-semibold">Clients</h1>
+        <div className="flex items-center gap-2">
+          <input
+            aria-label="Search clients"
+            placeholder="Search clients..."
+            value={query}
+            onChange={(e) => setState((s) => ({ ...s, query: e.target.value }))}
+            className="rounded-xl border px-3 py-2 text-sm"
+            style={{
+              background: 'transparent',
+              color: 'var(--color-fg)',
               border: '1px solid var(--color-border)',
               borderRadius: 'var(--radius)',
-              padding: '0.5rem',
-              marginBottom: '0.5rem'
-            }}>
-              <div>
-                <Link to={`/clients/${c.id}`} style={{ color: 'var(--color-fg)', textDecoration: 'none' }}>
-                  <strong>{c.name}</strong>
-                </Link>
-              </div>
-              <div style={{ color: 'var(--color-muted)', fontSize: 12 }}>
-                {(c.contacts?.[0]?.email || 'no email')} · {(c.contacts?.[0]?.phone || 'no phone')}
-              </div>
-            </li>
-          ))}
-        </ul>
-      )}
-
-      <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem', flexWrap: 'wrap' }}>
-        <Button variant="muted" onClick={refresh}>
-          Refresh
-        </Button>
-        <Button variant="muted" onClick={exportCSV}>
-          Export CSV
-        </Button>
+              minWidth: '240px'
+            }}
+          />
+          <select
+            aria-label="Sort clients"
+            value={sortKey}
+            onChange={(e) => setState((s) => ({ ...s, sortKey: e.target.value as SortKey }))}
+            className="rounded-xl border px-3 py-2 text-sm"
+            style={{
+              background: 'transparent',
+              color: 'var(--color-fg)',
+              border: '1px solid var(--color-border)',
+              borderRadius: 'var(--radius)',
+              padding: '0.45rem 0.5rem'
+            }}
+          >
+            <option value="name-asc" style={{ color: 'black' }}>Name ↑</option>
+            <option value="name-desc" style={{ color: 'black' }}>Name ↓</option>
+            <option value="created-asc" style={{ color: 'black' }}>Created ↑</option>
+            <option value="created-desc" style={{ color: 'black' }}>Created ↓</option>
+          </select>
+          <Button variant="muted" onClick={() => setState({ query: "", sortKey: "created-desc" })} aria-label="Reset filters">
+            Reset
+          </Button>
+          <Button variant="muted" onClick={exportCSV} aria-label="Export CSV">
+            Export CSV
+          </Button>
+          <Button variant="primary" onClick={() => nav("/clients/new")} aria-label="Add Client">
+            Add Client
+          </Button>
+        </div>
       </div>
+
+      {shown.length === 0 ? (
+        <div className="rounded-2xl border p-8 text-center" style={{
+          border: '1px solid var(--color-border)',
+          borderRadius: 'var(--radius)',
+          padding: '2rem',
+          textAlign: 'center'
+        }}>
+          <p className="text-sm opacity-80" style={{ color: 'var(--color-muted)' }}>
+            {all.length === 0 ? "No clients yet. Add your first client to get started." : "No clients match your search."}
+          </p>
+          <div className="mt-4">
+            <Button variant="primary" onClick={() => nav("/clients/new")} aria-label="Add Client">Add Client</Button>
+          </div>
+        </div>
+      ) : (
+        <div className="overflow-auto rounded-2xl border" style={{
+          border: '1px solid var(--color-border)',
+          borderRadius: 'var(--radius)',
+          overflow: 'auto'
+        }}>
+          <table className="min-w-full text-sm" style={{ width: '100%', fontSize: '0.875rem' }}>
+            <thead style={{ background: 'rgba(0,0,0,0.05)' }}>
+              <tr>
+                <th className="px-3 py-2 text-left" style={{ padding: '0.5rem 0.75rem', textAlign: 'left' }}>Name</th>
+                <th className="px-3 py-2 text-left" style={{ padding: '0.5rem 0.75rem', textAlign: 'left' }}>Email</th>
+                <th className="px-3 py-2 text-left" style={{ padding: '0.5rem 0.75rem', textAlign: 'left' }}>Phone</th>
+                <th className="px-3 py-2 text-left" style={{ padding: '0.5rem 0.75rem', textAlign: 'left' }}>Status</th>
+                <th className="px-3 py-2 text-left" style={{ padding: '0.5rem 0.75rem', textAlign: 'left' }}>Created</th>
+              </tr>
+            </thead>
+            <tbody>
+              {shown.map((c) => (
+                <tr key={c.id} style={{ borderTop: '1px solid var(--color-border)' }}>
+                  <td className="px-3 py-2" style={{ padding: '0.5rem 0.75rem' }}>
+                    <Link to={`/clients/${c.id}`} className="underline underline-offset-2" style={{
+                      textDecoration: 'underline',
+                      textUnderlineOffset: '2px',
+                      color: 'var(--color-fg)'
+                    }}>
+                      {c.name}
+                    </Link>
+                  </td>
+                  <td className="px-3 py-2" style={{ padding: '0.5rem 0.75rem' }}>
+                    {c.email ?? c.contacts?.[0]?.email ?? "-"}
+                  </td>
+                  <td className="px-3 py-2" style={{ padding: '0.5rem 0.75rem' }}>
+                    {c.phone ?? c.contacts?.[0]?.phone ?? "-"}
+                  </td>
+                  <td className="px-3 py-2" style={{ padding: '0.5rem 0.75rem' }}>{c.status}</td>
+                  <td className="px-3 py-2" style={{ padding: '0.5rem 0.75rem' }}>
+                    {c.createdAt ? new Date(c.createdAt).toLocaleString() : "-"}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 }

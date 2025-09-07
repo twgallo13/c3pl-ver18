@@ -14,7 +14,8 @@ export function toCSV<T extends Record<string, any>>(rows: T[], headers?: string
   return head + '\n' + body;
 }
 
-export function downloadCSV(filename: string, csv: string) {
+export function downloadCSV(rows: any[], filename: string) {
+  const csv = toCSV(rows);
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
