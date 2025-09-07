@@ -3,28 +3,64 @@ import { Link } from 'react-router-dom';
 import { getInventory, removeInventoryItem } from '../../lib/repos/inventoryRepo';
 import { useToast } from '../../components/ui/Toast';
 import { toCSV, downloadCSV } from '../../lib/csv';
+import { includes } from '../../lib/filters';
+
+const STORAGE_KEY = 'filters.inventory';
+
+type Filters = {
+  sku: string;
+  name: string;
+  location: string;
+};
 
 export default function InventoryList() {
   const [items, setItems] = React.useState(() => getInventory());
-  const [qSku, setQSku] = React.useState<string>('');
-  const [qName, setQName] = React.useState<string>('');
-  const [qLoc, setQLoc] = React.useState<string>('');
+  
+  // Load persisted filters
+  const loadFilters = React.useCallback((): Filters => {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      return stored ? JSON.parse(stored) : { sku: '', name: '', location: '' };
+    } catch {
+      return { sku: '', name: '', location: '' };
+    }
+  }, []);
+
+  // Raw filter inputs (responsive to typing)
+  const [rawFilters, setRawFilters] = React.useState<Filters>(loadFilters);
+  
+  // Debounced filters (used for actual filtering)
+  const [debouncedFilters, setDebouncedFilters] = React.useState<Filters>(rawFilters);
+  
   const { push } = useToast();
 
+  // Debounce filter changes (200ms)
+  React.useEffect(() => {
+    const timeout = setTimeout(() => {
+      setDebouncedFilters(rawFilters);
+      // Persist to localStorage
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(rawFilters));
+    }, 200);
+
+    return () => clearTimeout(timeout);
+  }, [rawFilters]);
+
   function refresh() { setItems(getInventory()); }
-  const ci = (s: string | undefined, q: string | undefined) => {
-    const sv = (s ?? '').toString().toLowerCase();
-    const qv = (q ?? '').toString().toLowerCase();
-    return sv.includes(qv.trim());
-  };
+
+  function resetFilters() {
+    const emptyFilters = { sku: '', name: '', location: '' };
+    setRawFilters(emptyFilters);
+    setDebouncedFilters(emptyFilters);
+    localStorage.removeItem(STORAGE_KEY);
+  }
 
   const filtered = React.useMemo(() => {
     return items.filter(i =>
-      (qSku ? ci(i.sku, qSku) : true) &&
-      (qName ? ci(i.name, qName) : true) &&
-      (qLoc ? ci(i.location, qLoc) : true)
+      includes(i.sku, debouncedFilters.sku) &&
+      includes(i.name, debouncedFilters.name) &&
+      includes(i.location, debouncedFilters.location)
     );
-  }, [items, qSku, qName, qLoc]);
+  }, [items, debouncedFilters]);
 
   return (
     <div>
@@ -40,8 +76,10 @@ export default function InventoryList() {
       <div style={{ display: 'flex', gap: '0.5rem', margin: '0.75rem 0', flexWrap: 'wrap' }}>
         <input
           placeholder="SKU"
-          value={qSku}
-          onChange={e => setQSku(e.target.value)}
+          aria-label="Filter by SKU"
+          value={rawFilters.sku}
+          onChange={e => setRawFilters(prev => ({ ...prev, sku: e.target.value }))}
+          onKeyDown={e => e.key === 'Enter' && e.preventDefault()}
           style={{
             background: 'transparent', color: 'var(--color-fg)',
             border: '1px solid var(--color-border)', borderRadius: 'var(--radius)', padding: '0.5rem', minWidth: 120
@@ -49,8 +87,10 @@ export default function InventoryList() {
         />
         <input
           placeholder="Name"
-          value={qName}
-          onChange={e => setQName(e.target.value)}
+          aria-label="Filter by name"
+          value={rawFilters.name}
+          onChange={e => setRawFilters(prev => ({ ...prev, name: e.target.value }))}
+          onKeyDown={e => e.key === 'Enter' && e.preventDefault()}
           style={{
             background: 'transparent', color: 'var(--color-fg)',
             border: '1px solid var(--color-border)', borderRadius: 'var(--radius)', padding: '0.5rem', minWidth: 120
@@ -58,8 +98,10 @@ export default function InventoryList() {
         />
         <input
           placeholder="Location"
-          value={qLoc}
-          onChange={e => setQLoc(e.target.value)}
+          aria-label="Filter by location"
+          value={rawFilters.location}
+          onChange={e => setRawFilters(prev => ({ ...prev, location: e.target.value }))}
+          onKeyDown={e => e.key === 'Enter' && e.preventDefault()}
           style={{
             background: 'transparent', color: 'var(--color-fg)',
             border: '1px solid var(--color-border)', borderRadius: 'var(--radius)', padding: '0.5rem', minWidth: 120
@@ -86,6 +128,17 @@ export default function InventoryList() {
           }}
         >
           Export CSV
+        </button>
+        <button
+          onClick={resetFilters}
+          aria-label="Reset all filters"
+          style={{
+            border: '1px solid var(--color-border)', borderRadius: 'var(--radius)',
+            padding: '0.5rem 0.75rem', background: 'transparent',
+            color: 'var(--color-fg)', cursor: 'pointer'
+          }}
+        >
+          Reset Filters
         </button>
       </div>
 

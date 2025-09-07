@@ -4,28 +4,64 @@ import { getShipments, removeShipment } from '../../lib/repos/shipmentRepo';
 import { useToast } from '../../components/ui/Toast';
 import { clientName } from '../../lib/lookup';
 import { toCSV, downloadCSV } from '../../lib/csv';
+import { includes } from '../../lib/filters';
+
+const STORAGE_KEY = 'filters.shipments';
+
+type Filters = {
+  carrier: string;
+  tracking: string;
+  status: string;
+};
 
 export default function ShipmentList() {
   const [items, setItems] = React.useState(() => getShipments());
-  const [qCarrier, setQCarrier] = React.useState<string>('');
-  const [qTrack, setQTrack] = React.useState<string>('');
-  const [status, setStatus] = React.useState<string>('');
+  
+  // Load persisted filters
+  const loadFilters = React.useCallback((): Filters => {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      return stored ? JSON.parse(stored) : { carrier: '', tracking: '', status: '' };
+    } catch {
+      return { carrier: '', tracking: '', status: '' };
+    }
+  }, []);
+
+  // Raw filter inputs (responsive to typing)
+  const [rawFilters, setRawFilters] = React.useState<Filters>(loadFilters);
+  
+  // Debounced filters (used for actual filtering)
+  const [debouncedFilters, setDebouncedFilters] = React.useState<Filters>(rawFilters);
+  
   const { push } = useToast();
 
+  // Debounce filter changes (200ms)
+  React.useEffect(() => {
+    const timeout = setTimeout(() => {
+      setDebouncedFilters(rawFilters);
+      // Persist to localStorage
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(rawFilters));
+    }, 200);
+
+    return () => clearTimeout(timeout);
+  }, [rawFilters]);
+
   function refresh() { setItems(getShipments()); }
-  const ci = (s: string | undefined, q: string | undefined) => {
-    const sv = (s ?? '').toString().toLowerCase();
-    const qv = (q ?? '').toString().toLowerCase();
-    return sv.includes(qv.trim());
-  };
+
+  function resetFilters() {
+    const emptyFilters = { carrier: '', tracking: '', status: '' };
+    setRawFilters(emptyFilters);
+    setDebouncedFilters(emptyFilters);
+    localStorage.removeItem(STORAGE_KEY);
+  }
 
   const filtered = React.useMemo(() =>
     items.filter(s =>
-      (qCarrier ? ci(s.carrier, qCarrier) : true) &&
-      (qTrack ? ci(s.tracking, qTrack) : true) &&
-      (status ? s.status === status : true)
+      includes(s.carrier, debouncedFilters.carrier) &&
+      includes(s.tracking, debouncedFilters.tracking) &&
+      (!debouncedFilters.status || s.status === debouncedFilters.status)
     ),
-    [items, qCarrier, qTrack, status]);
+    [items, debouncedFilters]);
 
   return (
     <div>
@@ -40,7 +76,10 @@ export default function ShipmentList() {
       <div style={{ display: 'flex', gap: '0.5rem', margin: '0.75rem 0', flexWrap: 'wrap' }}>
         <input
           placeholder="Carrier"
-          value={qCarrier} onChange={e => setQCarrier(e.target.value)}
+          aria-label="Filter by carrier"
+          value={rawFilters.carrier}
+          onChange={e => setRawFilters(prev => ({ ...prev, carrier: e.target.value }))}
+          onKeyDown={e => e.key === 'Enter' && e.preventDefault()}
           style={{
             background: 'transparent', color: 'var(--color-fg)', border: '1px solid var(--color-border)',
             borderRadius: 'var(--radius)', padding: '0.5rem', minWidth: 120
@@ -48,15 +87,19 @@ export default function ShipmentList() {
         />
         <input
           placeholder="Tracking"
-          value={qTrack} onChange={e => setQTrack(e.target.value)}
+          aria-label="Filter by tracking"
+          value={rawFilters.tracking}
+          onChange={e => setRawFilters(prev => ({ ...prev, tracking: e.target.value }))}
+          onKeyDown={e => e.key === 'Enter' && e.preventDefault()}
           style={{
             background: 'transparent', color: 'var(--color-fg)', border: '1px solid var(--color-border)',
             borderRadius: 'var(--radius)', padding: '0.5rem', minWidth: 120
           }}
         />
         <select
-          value={status}
-          onChange={e => setStatus(e.target.value)}
+          value={rawFilters.status}
+          onChange={e => setRawFilters(prev => ({ ...prev, status: e.target.value }))}
+          aria-label="Filter by status"
           style={{
             background: 'transparent', color: 'var(--color-fg)', border: '1px solid var(--color-border)',
             borderRadius: 'var(--radius)', padding: '0.45rem 0.5rem'
@@ -89,6 +132,17 @@ export default function ShipmentList() {
           }}
         >
           Export CSV
+        </button>
+        <button
+          onClick={resetFilters}
+          aria-label="Reset all filters"
+          style={{
+            border: '1px solid var(--color-border)', borderRadius: 'var(--radius)',
+            padding: '0.5rem 0.75rem', background: 'transparent',
+            color: 'var(--color-fg)', cursor: 'pointer'
+          }}
+        >
+          Reset Filters
         </button>
       </div>
 
