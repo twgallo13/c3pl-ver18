@@ -5,7 +5,7 @@ import ErrorState from '../../components/ui/ErrorState';
 import EmptyState from './EmptyState';
 import { Button } from '../../components/ui/button';
 import { useToast } from '../../components/ui/Toast';
-import { getClients, removeClient } from '../../lib/repos/clientRepo';
+import { getAll, getById, deleteClient } from '../../lib/repos/clientRepo';
 import { getPurchaseOrders } from '../../lib/repos/poRepo';
 import { getShipments } from '../../lib/repos/shipmentRepo';
 
@@ -15,11 +15,11 @@ export default function ClientDetails() {
   const { push } = useToast();
   const [status, setStatus] = React.useState<'loading' | 'ready' | 'empty' | 'error'>('loading');
   const [error, setError] = React.useState<string | undefined>();
-  const [client, setClient] = React.useState<ReturnType<typeof getClients>[number] | null>(null);
+  const [client, setClient] = React.useState<ReturnType<typeof getAll>[number] | null>(null);
 
   React.useEffect(() => {
     try {
-      const all = getClients();
+      const all = getAll();
       const c = all.find(x => x.id === id);
       if (!c) {
         setStatus('empty');
@@ -37,7 +37,7 @@ export default function ClientDetails() {
     if (!confirm('Delete this client?')) return;
     if (!id) return;
     try {
-      removeClient(id);
+      deleteClient(id);
       push({ text: 'Client deleted', kind: 'success' });
       navigate('/clients');
     } catch (e) {
@@ -88,6 +88,9 @@ export default function ClientDetails() {
         </div>
         <div style={{ color: 'var(--color-muted)' }}>
           {(client!.contacts?.[0]?.email || 'no email')} · {(client!.contacts?.[0]?.phone || 'no phone')}
+        </div>
+        <div style={{ marginTop: '0.5rem', color: 'var(--color-muted)' }}>
+          <strong>Created:</strong> {client!.createdAt ? new Date(client!.createdAt).toLocaleString() : '-'}
         </div>
       </div>
 

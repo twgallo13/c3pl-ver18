@@ -4,7 +4,7 @@ import { useZodForm } from '../../lib/forms/useZodForm';
 import FormField from '../../components/ui/FormField';
 import { validate, UUID, ISODate, Email, Phone, NonEmptyString } from '../../lib/contracts';
 import { getLeads, upsertLead, removeLead } from '../../lib/repos/leadRepo';
-import { upsertClient } from '../../lib/repos/clientRepo';
+import { createClient } from '../../lib/repos/clientRepo';
 import { leadToClient } from '../../lib/transformations';
 import { useToast } from '../../components/ui/Toast';
 
@@ -55,7 +55,7 @@ export default function LeadCreate() {
     const parsed = validate(LeadSchema, f.values);
     if (!parsed.success) return;
     const client = leadToClient(parsed.data);
-    upsertClient(client);
+    createClient(client);
     removeLead(parsed.data.id);         // optional: move instead of copy
     setLeads(getLeads());
     setPromotedMessage(`Promoted: ${parsed.data.name} → Client`);

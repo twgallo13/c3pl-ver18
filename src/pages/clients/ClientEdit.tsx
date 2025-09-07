@@ -3,7 +3,7 @@ import EmptyState from "./EmptyState";
 import React from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { z } from 'zod';
-import { getClients, upsertClient } from '../../lib/repos/clientRepo';
+import { getAll, updateClient } from '../../lib/repos/clientRepo';
 import { useZodForm } from '../../lib/forms/useZodForm';
 import FormField from '../../components/ui/FormField';
 import { useToast } from '../../components/ui/Toast';
@@ -24,7 +24,7 @@ export default function ClientEdit() {
   const { push } = useToast();
 
   // Load existing client or null
-  const client = React.useMemo(() => getClients().find(c => c.id === id) || null, [id]);
+  const client = React.useMemo(() => getAll().find(c => c.id === id) || null, [id]);
 
   const initial: Shape = React.useMemo(() => ({
     id: client?.id || (id as string),
@@ -50,7 +50,9 @@ export default function ClientEdit() {
           : [],
         status: client?.status ?? 'Active',
       };
-      upsertClient(next as any);
+      if (id) {
+        updateClient(id, next as any);
+      }
       push({ text: 'Client updated', kind: 'success' });
       nav(`/clients/${values.id}`);
     } catch {

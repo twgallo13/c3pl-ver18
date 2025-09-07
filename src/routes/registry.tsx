@@ -64,28 +64,28 @@ export const routeRegistry: AppRoute[] = [
     component: ClientList,
     label: 'Clients',
     parent: null,
-    roles: ['admin', 'manager'],
+    roles: ['Admin', 'Manager'],
   },
   {
     path: '/clients/new',
     component: ClientCreate,
     label: 'New Client',
     parent: '/clients',
-    roles: ['admin', 'manager'],
+    roles: ['Admin', 'Manager'],
   },
   {
     path: '/clients/:id',
     component: ClientDetails,
     label: 'Client Details',
     parent: '/clients',
-    roles: ['admin', 'manager'],
+    roles: ['Admin', 'Manager'],
   },
   {
     path: '/clients/:id/edit',
     component: ClientEdit,
     label: 'Edit Client',
     parent: '/clients',
-    roles: ['admin', 'manager'],
+    roles: ['Admin', 'Manager'],
   },
   // ...existing code for other routes...
   {

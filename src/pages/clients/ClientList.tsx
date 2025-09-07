@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { getClients } from '../../lib/repos/clientRepo';
+import { getAll, Client } from '../../lib/repos/clientRepo';
 import { Button } from '../../components/ui/button';
 import EmptyState from './EmptyState';
 import { includes } from '../../lib/filters';
@@ -17,7 +17,7 @@ type ClientFilters = {
 };
 
 export default function ClientList() {
-  const [clients, setClients] = React.useState(() => getClients());
+  const [clients, setClients] = React.useState(() => getAll());
   const navigate = useNavigate();
   const { push } = useToast();
 
@@ -33,7 +33,7 @@ export default function ClientList() {
 
   // Raw filter inputs (responsive to typing)
   const [rawFilters, setRawFilters] = React.useState<ClientFilters>(loadFilters);
-  
+
   // Debounced filters (used for actual filtering)
   const [debouncedFilters, setDebouncedFilters] = React.useState<ClientFilters>(rawFilters);
 
@@ -50,34 +50,34 @@ export default function ClientList() {
 
   // In a later prompt we might add events or a bus; for now manual refresh
   function refresh() {
-    setClients(getClients());
+    setClients(getAll());
   }
 
   // Filter clients by search query
   const filteredClients = React.useMemo(() => {
     if (!debouncedFilters.query.trim()) return clients;
-    
+
     return clients.filter(client => {
       return includes(client.name, debouncedFilters.query) ||
-             includes(client.contacts?.[0]?.email, debouncedFilters.query) ||
-             includes(client.contacts?.[0]?.phone, debouncedFilters.query);
+        includes(client.contacts?.[0]?.email, debouncedFilters.query) ||
+        includes(client.contacts?.[0]?.phone, debouncedFilters.query);
     });
   }, [clients, debouncedFilters.query]);
 
   // Sort clients
   const sortedClients = React.useMemo(() => {
+    const n = (v?: number) => (typeof v === "number" ? v : 0);
     const sorters = {
-      "name-asc": (a: any, b: any) => a.name.localeCompare(b.name),
-      "name-desc": (a: any, b: any) => b.name.localeCompare(a.name),
-      "created-asc": (a: any, b: any) => (a.createdAt ?? 0) - (b.createdAt ?? 0),
-      "created-desc": (a: any, b: any) => (b.createdAt ?? 0) - (a.createdAt ?? 0),
+      "name-asc": (a: Client, b: Client) => a.name.localeCompare(b.name),
+      "name-desc": (a: Client, b: Client) => b.name.localeCompare(a.name),
+      "created-asc": (a: Client, b: Client) => n(a.createdAt) - n(b.createdAt),
+      "created-desc": (a: Client, b: Client) => n(b.createdAt) - n(a.createdAt),
     } as const;
-    
     return [...filteredClients].sort(sorters[debouncedFilters.sortKey]);
   }, [filteredClients, debouncedFilters.sortKey]);
 
   function exportCSV() {
-    const rows = getClients().map(c => ({
+    const rows = getAll().map(c => ({
       id: c.id,
       name: c.name,
       email: c.contacts?.[0]?.email ?? '',
@@ -138,7 +138,7 @@ export default function ClientList() {
       <p style={{ color: 'var(--color-muted)' }}>
         Showing {sortedClients.length} of {clients.length} client{clients.length === 1 ? '' : 's'} (local demo).
       </p>
-      
+
       {sortedClients.length === 0 ? (
         clients.length === 0 ? (
           <EmptyState title="No clients yet" subtitle="Add your first client to get started." showAdd />
@@ -168,7 +168,7 @@ export default function ClientList() {
           ))}
         </ul>
       )}
-      
+
       <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem', flexWrap: 'wrap' }}>
         <Button variant="muted" onClick={refresh}>
           Refresh

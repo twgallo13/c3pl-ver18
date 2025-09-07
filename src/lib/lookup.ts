@@ -1,11 +1,11 @@
 // src/lib/lookup.ts
-import { getClients } from './repos/clientRepo';
+import { getAll } from './repos/clientRepo';
 import { getVendors } from './repos/vendorRepo';
 import { getInventory } from './repos/inventoryRepo';
 
 export function clientName(id: string | undefined | null): string {
   if (!id) return '';
-  const c = getClients().find(x => x.id === id);
+  const c = getAll().find(x => x.id === id);
   return c?.name ?? id;
 }
 

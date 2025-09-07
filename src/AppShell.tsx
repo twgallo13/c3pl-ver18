@@ -47,7 +47,7 @@ function AuthedAppShellInner() {
   function canSee(route, role) {
     if (!route.roles || route.roles.length === 0) return true;
     if (!role) return false;
-    return route.roles.includes(role);
+    return route.roles.some(r => r.toLowerCase() === role.toLowerCase());
   }
   const visibleRoutes = routeRegistry.filter(r => r.label && canSee(r, role));
   // Dev-only warning for unlabeled routes
