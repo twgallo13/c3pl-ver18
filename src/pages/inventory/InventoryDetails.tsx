@@ -1,107 +1,92 @@
-import React from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
-import Loading from '../../components/ui/Loading';
-import ErrorState from '../../components/ui/ErrorState';
-import EmptyState from '../clients/EmptyState';
-import { Button } from '../../components/ui/button';
-import { useToast } from '../../components/ui/Toast';
-import { getInventory, removeInventoryItem } from '../../lib/repos/inventoryRepo';
+import { Link, useNavigate, useParams } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Button } from "../../components/ui/button";
+import { useToast } from "../../components/ui/Toast";
+import EmptyState from "../clients/EmptyState";
+import { getInventory, removeInventoryItem } from "../../lib/repos/inventoryRepo";
+import { InventoryItem } from "../../lib/contracts";
+import { z } from "zod";
 
 export default function InventoryDetails() {
-  const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
+  const { id } = useParams();
+  const nav = useNavigate();
   const { push } = useToast();
-  const [status, setStatus] = React.useState<'loading' | 'ready' | 'empty' | 'error'>('loading');
-  const [error, setError] = React.useState<string | undefined>();
-  const [item, setItem] = React.useState<ReturnType<typeof getInventory>[number] | null>(null);
+  const [item, setItem] = useState<z.infer<typeof InventoryItem> | undefined>(undefined);
 
-  React.useEffect(() => {
-    try {
-      const all = getInventory();
-      const i = all.find(x => x.id === id);
-      if (!i) {
-        setStatus('empty');
-      } else {
-        setItem(i);
-        setStatus('ready');
-      }
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Unknown error');
-      setStatus('error');
-    }
+  // Load inventory item
+  useEffect(() => {
+    if (!id) return;
+    const foundItem = getInventory().find(item => item.id === id);
+    setItem(foundItem);
   }, [id]);
 
-  const handleDelete = async () => {
-    if (!confirm('Delete this inventory item?')) return;
-    if (!id) return;
+  if (!item) {
+    return (
+      <EmptyState
+        title="Item not found"
+        subtitle="It may have been deleted or the link is incorrect."
+      />
+    );
+  }
+
+  const onDelete = async () => {
+    if (!confirm("Delete this inventory item?")) return;
     try {
-      removeInventoryItem(id);
-      push({ text: 'Inventory item deleted', kind: 'success' });
-      navigate('/inventory');
-    } catch (e) {
-      push({ text: 'Failed to delete inventory item', kind: 'error' });
+      removeInventoryItem(item.id);
+      push({ text: "Item deleted", kind: "success" });
+      nav("/inventory");
+    } catch {
+      push({ text: "Failed to delete item", kind: "error" });
     }
   };
 
-  if (status === 'loading') return <Loading label="Loading inventory item…" />;
-  if (status === 'error') return <ErrorState title="Failed to load" detail={error} />;
-  if (status === 'empty') return (
-    <EmptyState
-      title="Item not found"
-      subtitle="It may have been deleted or the link is incorrect."
-    />
-  );
-
   return (
-    <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-        <h1 style={{ marginTop: 0 }}>{item!.name}</h1>
-        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-xl font-semibold">{item.name}</h1>
+        <div className="flex items-center gap-2">
           <Button
             variant="muted"
-            onClick={() => navigate(`/inventory/${item!.id}/edit`)}
-            aria-label="Edit Item"
+            onClick={() => nav(`/inventory/${item.id}/edit`)}
+            aria-label="Edit"
           >
             Edit
           </Button>
-          <Button
-            variant="destructive"
-            onClick={handleDelete}
-            aria-label="Delete Item"
-          >
+          <Button variant="destructive" onClick={onDelete} aria-label="Delete">
             Delete
           </Button>
-          <Link to="/inventory" style={{ color: 'var(--color-muted)', textDecoration: 'none', marginLeft: '0.5rem' }}>← Back to Inventory</Link>
+          <Link to="/inventory">
+            <Button variant="ghost" aria-label="Back">
+              Back
+            </Button>
+          </Link>
         </div>
       </div>
 
-      <div style={{
-        border: '1px solid var(--color-border)',
-        borderRadius: 'var(--radius)',
-        padding: '0.75rem',
-        background: 'rgba(255,255,255,0.03)'
-      }}>
-        <div style={{ display: 'grid', gap: '0.75rem', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))' }}>
-          <div>
-            <strong>SKU:</strong> {item!.sku}
-          </div>
-          <div>
-            <strong>UPC:</strong> {item!.upc || '-'}
-          </div>
-          <div>
-            <strong>Location:</strong> {item!.location || '-'}
-          </div>
-          <div>
-            <strong>Qty On Hand:</strong> {item!.qtyOnHand}
-          </div>
-          <div>
-            <strong>Qty Allocated:</strong> {item!.qtyAllocated}
-          </div>
-          <div>
-            <strong>Available:</strong> {Math.max(0, item!.qtyOnHand - item!.qtyAllocated)}
-          </div>
-        </div>
+      <div className="grid gap-3 sm:grid-cols-2">
+        <FieldDisplay label="SKU" value={item.sku} />
+        <FieldDisplay label="Location" value={item.location ?? "-"} />
+        <FieldDisplay label="Quantity On Hand" value={String(item.qtyOnHand ?? 0)} />
+        <FieldDisplay label="Quantity Allocated" value={String(item.qtyAllocated ?? 0)} />
       </div>
+    </div>
+  );
+}
+
+function FieldDisplay({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="space-y-1">
+      <div className="text-xs uppercase tracking-wide opacity-70">{label}</div>
+      <div className="text-sm">{value}</div>
+    </div>
+  );
+}
+
+function Field({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="space-y-1">
+      <div className="text-xs uppercase tracking-wide opacity-70">{label}</div>
+      <div className="text-sm">{value}</div>
     </div>
   );
 }
