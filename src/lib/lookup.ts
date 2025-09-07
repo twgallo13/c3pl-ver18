@@ -1,3 +1,4 @@
+// src/lib/lookup.ts
 import { getClients } from './repos/clientRepo';
 import { getVendors } from './repos/vendorRepo';
 import { getInventory } from './repos/inventoryRepo';
