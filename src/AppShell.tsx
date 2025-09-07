@@ -6,7 +6,7 @@ import NotFound from './components/NotFound';
 import { APP_VERSION } from './version';
 import ErrorBoundary from './components/ui/ErrorBoundary';
 import Loading from './components/ui/Loading';
-import { ToastProvider } from './components/ui/Toast';
+import { ToastProvider, useToast } from './components/ui/Toast';
 import { AuthProvider, useAuth } from './components/auth/AuthProvider';
 import LoginGate from './components/auth/LoginGate';
 import NotAuthorized from './pages/NotAuthorized';
@@ -28,11 +28,22 @@ function RequireRole({ roles, currentRole, children }: {
 
 function AuthedAppShellInner() {
   const { user, setRole, signOut } = useAuth();
-  if (!user) return <LoginGate />;
+  const { push } = useToast();
+  const location = useLocation();
+
+  if (!user) {
+    // Remember where the user was trying to go, so we can return post sign-in
+    return <LoginGate nextPath={location.pathname || '/'} />;
+  }
+
+  function handleSignOut() {
+    signOut();
+    push({ text: 'Signed out', kind: 'success' });
+    // rendering will show LoginGate automatically
+  }
 
   const role = user.role;
   const routes = allowedRoutes(role);
-  const location = useLocation();
 
   const ROLES = [
     'Admin',
@@ -104,7 +115,7 @@ function AuthedAppShellInner() {
           {/* Sign out button at bottom */}
           <div style={{ marginTop: 'auto', paddingTop: '0.75rem' }}>
             <button
-              onClick={signOut}
+              onClick={handleSignOut}
               style={{
                 width: '100%',
                 border: '1px solid var(--color-border)',
