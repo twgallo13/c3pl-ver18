@@ -1,9 +1,11 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { getClients } from '../../lib/repos/clientRepo';
+import { Button } from '../../components/ui/button';
 
 export default function ClientList() {
   const [clients, setClients] = React.useState(() => getClients());
+  const navigate = useNavigate();
 
   // In a later prompt we might add events or a bus; for now manual refresh
   function refresh() {
@@ -12,7 +14,12 @@ export default function ClientList() {
 
   return (
     <div>
-      <h1 style={{ marginTop: 0 }}>Clients</h1>
+      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'baseline', marginBottom: '1rem' }}>
+        <h1 style={{ marginTop: 0 }}>Clients</h1>
+        <Button onClick={() => navigate('/clients/new')} aria-label="Add Client">
+          Add Client
+        </Button>
+      </div>
       <p style={{ color: 'var(--color-muted)' }}>
         Showing {clients.length} client{clients.length === 1 ? '' : 's'} (local demo).
       </p>
@@ -39,17 +46,11 @@ export default function ClientList() {
           ))}
         </ul>
       )}
-      <button onClick={refresh}
-        style={{
-          border: '1px solid var(--color-border)',
-          borderRadius: 'var(--radius)',
-          padding: '0.5rem 0.75rem',
-          background: 'transparent',
-          color: 'var(--color-fg)',
-          cursor: 'pointer'
-        }}>
-        Refresh
-      </button>
+      <div style={{ display:'flex', gap:'0.5rem', marginTop: '1rem' }}>
+        <Button variant="outline" onClick={refresh}>
+          Refresh
+        </Button>
+      </div>
     </div>
   );
 }

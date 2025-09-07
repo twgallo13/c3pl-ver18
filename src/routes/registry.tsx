@@ -10,6 +10,7 @@ import LeadCreate from '../pages/leads/LeadCreate';
 import ClientList from '../pages/clients/ClientList';
 import ClientDetails from '../pages/clients/ClientDetails';
 import ClientEdit from '../pages/clients/ClientEdit';
+import ClientCreate from '../pages/clients/ClientCreate';
 import InventoryList from '../pages/inventory/InventoryList';
 import InventoryCreate from '../pages/inventory/InventoryCreate';
 import POList from '../pages/po/POList';
@@ -64,6 +65,14 @@ export const routeRegistry: AppRoute[] = [
     label: 'Clients',
     icon: '👥',
     parent: null,
+    roles: ['Admin', 'Finance', 'AccountManager', 'CS'],
+  },
+  {
+    path: '/clients/new',
+    component: ClientCreate,
+    label: 'New Client',
+    icon: '➕',
+    parent: '/clients',
     roles: ['Admin', 'Finance', 'AccountManager', 'CS'],
   },
   {

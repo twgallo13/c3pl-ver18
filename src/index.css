@@ -41,6 +41,11 @@
   --font-sans: "Inter";
   --font-serif: "Lora";
   --font-mono: "Source Code Pro";
+  /* Button tokens for contrast safety */
+  --btn-bg-primary: oklch(0.25 0.05 240);
+  --btn-fg-primary: oklch(0.98 0.008 85);
+  --btn-bg-secondary: oklch(0.88 0.02 85);
+  --btn-fg-secondary: oklch(0.25 0.02 45);
 }
 @theme {
   --spacing: 0.25rem;
