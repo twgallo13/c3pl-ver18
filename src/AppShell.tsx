@@ -3,7 +3,6 @@ import { Routes, Route, Navigate, Link, useLocation } from 'react-router-dom';
 import routeRegistry from './routes/registry';
 import type { AppRoute } from './routes/registry';
 import NotFound from './components/NotFound';
-import RoleSwitcher from './components/RoleSwitcher';
 import { APP_VERSION } from './version';
 import ErrorBoundary from './components/ui/ErrorBoundary';
 import Loading from './components/ui/Loading';
@@ -12,10 +11,6 @@ import { AuthProvider, useAuth } from './components/auth/AuthProvider';
 import LoginGate from './components/auth/LoginGate';
 import NotAuthorized from './pages/NotAuthorized';
 
-function getCurrentRole(): string {
-  // Temp local role until server RBAC is wired; default Admin for access
-  return localStorage.getItem('currentRole') || 'Admin';
-}
 function allowedRoutes(role: string): AppRoute[] {
   return routeRegistry.filter(r => r.roles.includes(role) || r.roles.includes('All Internal'));
 }
@@ -32,12 +27,24 @@ function RequireRole({ roles, currentRole, children }: {
 }
 
 function AuthedAppShellInner() {
-  const { user } = useAuth();
+  const { user, setRole, signOut } = useAuth();
   if (!user) return <LoginGate />;
 
   const role = user.role;
   const routes = allowedRoutes(role);
   const location = useLocation();
+
+  const ROLES = [
+    'Admin',
+    'Finance',
+    'Ops',
+    'CS',
+    'AccountManager',
+    'WarehouseManager',
+    'WarehouseStaff',
+    'Vendor',
+    'Investor'
+  ] as const;
 
   return (
     <ToastProvider>
@@ -45,19 +52,41 @@ function AuthedAppShellInner() {
         <aside style={{
           borderRight: `1px solid var(--color-border)`,
           padding: '1rem',
-          background: 'rgba(255,255,255,0.02)'
+          background: 'rgba(255,255,255,0.02)',
+          display: 'flex',
+          flexDirection: 'column'
         }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '0.5rem' }}>
             <div style={{ fontWeight: 600 }}>Collab3PL</div>
             <div style={{ fontSize: 12, color: 'var(--color-muted)' }}>{APP_VERSION}</div>
           </div>
 
-          {/* Role switcher (local tester) */}
+          {/* Role switcher synced with auth */}
           <div style={{ marginBottom: '0.75rem' }}>
-            <RoleSwitcher />
+            <label style={{ display: 'grid', gap: 6, fontSize: 12 }}>
+              <span style={{ color: 'var(--color-muted)' }}>Role</span>
+              <select
+                value={user.role}
+                onChange={e => setRole(e.target.value as any)}
+                style={{
+                  background: 'transparent',
+                  color: 'var(--color-fg)',
+                  border: '1px solid var(--color-border)',
+                  borderRadius: 'var(--radius)',
+                  padding: '0.35rem 0.5rem',
+                  outline: 'none'
+                }}
+              >
+                {ROLES.map(r => (
+                  <option key={r} value={r} style={{ color: 'black' }}>
+                    {r}
+                  </option>
+                ))}
+              </select>
+            </label>
           </div>
 
-          <nav style={{ display: 'grid', gap: '0.5rem' }}>
+          <nav style={{ display: 'grid', gap: '0.5rem', flex: 1 }}>
             {routes.map(r => (
               <Link key={r.path} to={r.path} style={{
                 textDecoration: 'none',
@@ -71,6 +100,24 @@ function AuthedAppShellInner() {
               </Link>
             ))}
           </nav>
+
+          {/* Sign out button at bottom */}
+          <div style={{ marginTop: 'auto', paddingTop: '0.75rem' }}>
+            <button
+              onClick={signOut}
+              style={{
+                width: '100%',
+                border: '1px solid var(--color-border)',
+                borderRadius: 'var(--radius)',
+                padding: '0.4rem 0.6rem',
+                background: 'transparent',
+                color: 'var(--color-fg)',
+                cursor: 'pointer'
+              }}
+            >
+              Sign out
+            </button>
+          </div>
         </aside>
 
         <main style={{ padding: '1rem' }}>
