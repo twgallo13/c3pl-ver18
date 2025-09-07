@@ -22,3 +22,9 @@ export function upsertLead(l: z.infer<typeof Lead>): void {
   else items.unshift(l);
   saveJSON(KEY, items);
 }
+
+export function removeLead(id: string): void {
+  const items = getLeads();
+  const next = items.filter(i => i.id !== id);
+  saveJSON(KEY, next);
+}

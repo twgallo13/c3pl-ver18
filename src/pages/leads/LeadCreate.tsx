@@ -3,7 +3,9 @@ import { z } from 'zod';
 import { useZodForm } from '../../lib/forms/useZodForm';
 import FormField from '../../components/ui/FormField';
 import { validate, UUID, ISODate, Email, Phone, NonEmptyString } from '../../lib/contracts';
-import { getLeads, upsertLead } from '../../lib/repos/leadRepo';
+import { getLeads, upsertLead, removeLead } from '../../lib/repos/leadRepo';
+import { upsertClient } from '../../lib/repos/clientRepo';
+import { leadToClient } from '../../lib/transformations';
 
 const LeadSchema = z.object({
   id: UUID,
@@ -50,9 +52,11 @@ export default function LeadCreate() {
   async function promoteToClient() {
     const parsed = validate(LeadSchema, f.values);
     if (!parsed.success) return;
-    upsertLead(parsed.data);
+    const client = leadToClient(parsed.data);
+    upsertClient(client);
+    removeLead(parsed.data.id);         // optional: move instead of copy
     setLeads(getLeads());
-    setPromotedMessage(`Promoted (stub): ${parsed.data.name} → Client (id matches Lead)`);
+    setPromotedMessage(`Promoted: ${parsed.data.name} → Client`);
   }
 
   return (
