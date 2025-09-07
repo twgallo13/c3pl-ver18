@@ -5,6 +5,7 @@ import { useZodForm } from '../../lib/forms/useZodForm';
 import FormField from '../../components/ui/FormField';
 import { PurchaseOrder, PurchaseOrderLine, UUID, ISODate, PositiveInt } from '../../lib/contracts';
 import { upsertPurchaseOrder } from '../../lib/repos/poRepo';
+import { useToast } from '../../components/ui/Toast';
 
 const LineEdit = z.object({
   id: UUID,
@@ -47,6 +48,7 @@ function initial(): Shape {
 export default function POCreate() {
   const nav = useNavigate();
   const f = useZodForm(CreatePOSchema, initial());
+  const { push } = useToast();
 
   function addLine() {
     f.set('lines', [...f.values.lines, {
@@ -89,6 +91,7 @@ export default function POCreate() {
     const parsed = PurchaseOrder.safeParse(po);
     if (!parsed.success) return;
     upsertPurchaseOrder(parsed.data);
+    push({ text: 'Purchase Order saved', kind: 'success' });
     nav('/po');
   }
 

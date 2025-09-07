@@ -1,10 +1,12 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { getShipments, removeShipment } from '../../lib/repos/shipmentRepo';
+import { useToast } from '../../components/ui/Toast';
 
 export default function ShipmentList() {
   const [items, setItems] = React.useState(() => getShipments());
   const [q, setQ] = React.useState('');
+  const { push } = useToast();
 
   function refresh() { setItems(getShipments()); }
   const matches = (s: string) => s.toLowerCase().includes(q.trim().toLowerCase());
@@ -63,7 +65,7 @@ export default function ShipmentList() {
                   </div>
                 </div>
                 <div style={{ display:'flex', gap:'0.5rem' }}>
-                  <button onClick={() => { removeShipment(s.id); refresh(); }} style={{
+                  <button onClick={() => { removeShipment(s.id); refresh(); push({ text: 'Shipment deleted', kind: 'success' }); }} style={{
                     border:'1px solid var(--color-border)', borderRadius:'var(--radius)',
                     padding:'0.35rem 0.6rem', background:'transparent', color:'var(--color-fg)', cursor:'pointer'
                   }}>Delete</button>

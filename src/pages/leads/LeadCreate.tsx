@@ -6,6 +6,7 @@ import { validate, UUID, ISODate, Email, Phone, NonEmptyString } from '../../lib
 import { getLeads, upsertLead, removeLead } from '../../lib/repos/leadRepo';
 import { upsertClient } from '../../lib/repos/clientRepo';
 import { leadToClient } from '../../lib/transformations';
+import { useToast } from '../../components/ui/Toast';
 
 const LeadSchema = z.object({
   id: UUID,
@@ -35,6 +36,7 @@ export default function LeadCreate() {
   const f = useZodForm(LeadSchema, newLead());
   const [promotedMessage, setPromotedMessage] = React.useState<string | null>(null);
   const [leads, setLeads] = React.useState(() => getLeads());
+  const { push } = useToast();
 
   const isValid = React.useMemo(
     () => LeadSchema.safeParse(f.values).success,
@@ -46,7 +48,7 @@ export default function LeadCreate() {
     if (!parsed.success) return;
     upsertLead(parsed.data);
     setLeads(getLeads());
-    alert(`Lead saved:\n${JSON.stringify(parsed.data, null, 2)}`);
+    push({ text: 'Lead saved', kind: 'success' });
   }
 
   async function promoteToClient() {
@@ -57,6 +59,7 @@ export default function LeadCreate() {
     removeLead(parsed.data.id);         // optional: move instead of copy
     setLeads(getLeads());
     setPromotedMessage(`Promoted: ${parsed.data.name} → Client`);
+    push({ text: 'Lead promoted to Client', kind: 'success' });
   }
 
   return (

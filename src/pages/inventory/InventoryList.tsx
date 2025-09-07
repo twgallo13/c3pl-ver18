@@ -1,10 +1,12 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { getInventory, removeInventoryItem } from '../../lib/repos/inventoryRepo';
+import { useToast } from '../../components/ui/Toast';
 
 export default function InventoryList() {
   const [items, setItems] = React.useState(() => getInventory());
   const [q, setQ] = React.useState('');
+  const { push } = useToast();
 
   function refresh() { setItems(getInventory()); }
   function matches(s: string) { return s.toLowerCase().includes(q.trim().toLowerCase()); }
@@ -57,7 +59,7 @@ export default function InventoryList() {
                 </div>
                 <div style={{ display:'flex', gap:'0.5rem' }}>
                   {/* Future: edit route */}
-                  <button onClick={() => { removeInventoryItem(i.id); refresh(); }} style={{
+                  <button onClick={() => { removeInventoryItem(i.id); refresh(); push({ text: 'Inventory item deleted', kind: 'success' }); }} style={{
                     border:'1px solid var(--color-border)', borderRadius:'var(--radius)',
                     padding:'0.35rem 0.6rem', background:'transparent', color:'var(--color-fg)', cursor:'pointer'
                   }}>Delete</button>

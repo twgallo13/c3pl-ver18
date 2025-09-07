@@ -1,10 +1,12 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { getPurchaseOrders, removePurchaseOrder } from '../../lib/repos/poRepo';
+import { useToast } from '../../components/ui/Toast';
 
 export default function POList() {
   const [items, setItems] = React.useState(() => getPurchaseOrders());
   const [q, setQ] = React.useState('');
+  const { push } = useToast();
 
   function refresh() { setItems(getPurchaseOrders()); }
   const matches = (s: string) => s.toLowerCase().includes(q.trim().toLowerCase());
@@ -61,7 +63,7 @@ export default function POList() {
                   </div>
                 </div>
                 <div style={{ display:'flex', gap:'0.5rem' }}>
-                  <button onClick={() => { removePurchaseOrder(po.id); refresh(); }} style={{
+                  <button onClick={() => { removePurchaseOrder(po.id); refresh(); push({ text: 'Purchase Order deleted', kind: 'success' }); }} style={{
                     border:'1px solid var(--color-border)', borderRadius:'var(--radius)',
                     padding:'0.35rem 0.6rem', background:'transparent', color:'var(--color-fg)', cursor:'pointer'
                   }}>Delete</button>

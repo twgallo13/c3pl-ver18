@@ -5,6 +5,7 @@ import { useZodForm } from '../../lib/forms/useZodForm';
 import FormField from '../../components/ui/FormField';
 import { Shipment, PositiveInt } from '../../lib/contracts';
 import { upsertShipment } from '../../lib/repos/shipmentRepo';
+import { useToast } from '../../components/ui/Toast';
 
 const LineEdit = z.object({
   id: z.string().uuid(),
@@ -45,6 +46,7 @@ function initial(): Shape {
 export default function ShipmentCreate() {
   const nav = useNavigate();
   const f = useZodForm(CreateSchema, initial());
+  const { push } = useToast();
 
   function addLine() {
     f.set('lines', [...f.values.lines, { id: crypto.randomUUID(), itemId: crypto.randomUUID(), qty: 1 }]);
@@ -75,6 +77,7 @@ export default function ShipmentCreate() {
     const parsed = Shipment.safeParse(s);
     if (!parsed.success) return;
     upsertShipment(parsed.data);
+    push({ text: 'Shipment saved', kind: 'success' });
     nav('/shipments');
   }
 

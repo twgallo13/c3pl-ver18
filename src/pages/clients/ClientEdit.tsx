@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { getClients, upsertClient } from '../../lib/repos/clientRepo';
 import { useZodForm } from '../../lib/forms/useZodForm';
 import FormField from '../../components/ui/FormField';
+import { useToast } from '../../components/ui/Toast';
 
 // A minimal editable slice of the Client contract
 const EditClientSchema = z.object({
@@ -18,6 +19,7 @@ type Shape = z.infer<typeof EditClientSchema>;
 export default function ClientEdit() {
   const { id } = useParams<{ id: string }>();
   const nav = useNavigate();
+  const { push } = useToast();
 
   // Load existing client or null
   const client = React.useMemo(() => getClients().find(c => c.id === id) || null, [id]);
@@ -48,6 +50,7 @@ export default function ClientEdit() {
     };
 
     upsertClient(next as any);
+    push({ text: 'Client updated', kind: 'success' });
     nav(`/clients/${values.id}`);
   }
 

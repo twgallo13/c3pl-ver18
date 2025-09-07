@@ -5,6 +5,7 @@ import { useZodForm } from '../../lib/forms/useZodForm';
 import FormField from '../../components/ui/FormField';
 import { InventoryItem } from '../../lib/contracts';
 import { upsertInventoryItem } from '../../lib/repos/inventoryRepo';
+import { useToast } from '../../components/ui/Toast';
 
 const CreateSchema = InventoryItem.pick({
   sku: true, name: true, upc: true, location: true
@@ -31,10 +32,12 @@ function initial(): Shape {
 export default function InventoryCreate() {
   const nav = useNavigate();
   const f = useZodForm(CreateSchema, initial());
+  const { push } = useToast();
 
   function save() {
     if (!f.validate()) return;
     upsertInventoryItem(f.values as any);
+    push({ text: 'Inventory item saved', kind: 'success' });
     nav('/inventory');
   }
 
