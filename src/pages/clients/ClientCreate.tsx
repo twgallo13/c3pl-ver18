@@ -105,8 +105,12 @@ export default function ClientCreate() {
           >
             Create Client
           </Button>
-          <Button variant="outline" asChild>
-            <Link to="/clients">Cancel</Link>
+          <Button 
+            type="button"
+            variant="ghost" 
+            onClick={() => nav('/clients')}
+          >
+            Cancel
           </Button>
         </div>
       </form>

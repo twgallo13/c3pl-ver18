@@ -47,7 +47,7 @@ export default function ClientList() {
         </ul>
       )}
       <div style={{ display:'flex', gap:'0.5rem', marginTop: '1rem' }}>
-        <Button variant="outline" onClick={refresh}>
+        <Button variant="muted" onClick={refresh}>
           Refresh
         </Button>
       </div>
