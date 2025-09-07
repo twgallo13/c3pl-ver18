@@ -83,6 +83,17 @@ export const Vendor = z.object({
   contact: Contact.optional(),
 });
 
+export const Lead = z.object({
+  id: UUID,
+  name: NonEmptyString,
+  email: Email.optional(),
+  phone: Phone.optional(),
+  company: z.string().optional(),
+  notes: z.string().optional(),
+  status: z.enum(["New", "Qualified", "Disqualified"]).default("New"),
+  createdAt: ISODate,
+});
+
 /** ---------- Inventory & Orders ---------- */
 export const InventoryItem = z.object({
   id: UUID,
@@ -157,6 +168,7 @@ export type Email = z.infer<typeof Email>;
 export type Phone = z.infer<typeof Phone>;
 export type Client = z.infer<typeof Client>;
 export type Vendor = z.infer<typeof Vendor>;
+export type Lead = z.infer<typeof Lead>;
 export type InventoryItem = z.infer<typeof InventoryItem>;
 export type PurchaseOrder = z.infer<typeof PurchaseOrder>;
 export type Shipment = z.infer<typeof Shipment>;

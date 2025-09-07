@@ -6,6 +6,7 @@
 import React from 'react';
 import DemoForm from '@/pages/demo/DemoForm';
 import DemoClient from '@/pages/demo/DemoClient';
+import LeadCreate from '@/pages/leads/LeadCreate';
 
 const FinanceDashboard: React.FC = () => <div>Finance Dashboard Placeholder</div>;
 
@@ -39,6 +40,14 @@ export const routeRegistry: AppRoute[] = [
     icon: '📦',
     parent: null,
     roles: ['Admin', 'Finance', 'Ops', 'CS'],
+  },
+  {
+    path: '/leads',
+    component: LeadCreate,
+    label: 'Leads',
+    icon: '🧲',
+    parent: null,
+    roles: ['Admin', 'Finance', 'Ops', 'CS', 'AccountManager'],
   },
 ];
 
