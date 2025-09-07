@@ -35,7 +35,12 @@ export default function ClientDetails() {
     <div>
       <div style={{ display:'flex', justifyContent:'space-between', alignItems:'baseline' }}>
         <h1 style={{ marginTop: 0 }}>{client!.name}</h1>
-        <Link to="/clients" style={{ color: 'var(--color-muted)', textDecoration:'none' }}>← Back to Clients</Link>
+        <div>
+          <Link to={`/clients/${client!.id}/edit`} style={{ color: 'var(--color-muted)', textDecoration:'none', marginRight: '0.75rem' }}>
+            Edit
+          </Link>
+          <Link to="/clients" style={{ color: 'var(--color-muted)', textDecoration:'none' }}>← Back to Clients</Link>
+        </div>
       </div>
 
       <div style={{
