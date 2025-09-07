@@ -6,6 +6,8 @@ import FormField from '../../components/ui/FormField';
 import { PurchaseOrder, PurchaseOrderLine, UUID, ISODate, PositiveInt } from '../../lib/contracts';
 import { upsertPurchaseOrder } from '../../lib/repos/poRepo';
 import { useToast } from '../../components/ui/Toast';
+import ClientPicker from '../../components/pickers/ClientPicker';
+import VendorPicker from '../../components/pickers/VendorPicker';
 
 const LineEdit = z.object({
   id: UUID,
@@ -17,8 +19,8 @@ const LineEdit = z.object({
 
 const CreatePOSchema = z.object({
   id: UUID,
-  clientId: UUID,
-  vendorId: UUID,
+  clientId: z.string(),
+  vendorId: z.string(),
   createdAt: ISODate,
   expectedAt: ISODate.optional(),
   status: z.enum(["Draft", "Submitted", "Received", "Closed", "Canceled"]).default("Draft"),
@@ -30,8 +32,8 @@ type Shape = z.infer<typeof CreatePOSchema>;
 function initial(): Shape {
   return {
     id: crypto.randomUUID(),
-    clientId: crypto.randomUUID(),
-    vendorId: crypto.randomUUID(),
+    clientId: '',
+    vendorId: '',
     createdAt: new Date().toISOString(),
     expectedAt: undefined,
     status: "Draft",
@@ -108,13 +110,11 @@ export default function POCreate() {
           padding:'0.75rem', marginBottom:'0.75rem', background:'rgba(255,255,255,0.03)'
         }}>
           <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'0.5rem' }}>
-            <FormField label="Client ID">
-              <input value={f.values.clientId} onChange={f.onChange('clientId')}
-                style={{ background:'transparent', color:'var(--color-fg)', border:'1px solid var(--color-border)', borderRadius:'var(--radius)', padding:'0.5rem' }}/>
+            <FormField label="Client">
+              <ClientPicker value={f.values.clientId} onChange={(id) => f.set('clientId', id as any)} />
             </FormField>
-            <FormField label="Vendor ID">
-              <input value={f.values.vendorId} onChange={f.onChange('vendorId')}
-                style={{ background:'transparent', color:'var(--color-fg)', border:'1px solid var(--color-border)', borderRadius:'var(--radius)', padding:'0.5rem' }}/>
+            <FormField label="Vendor">
+              <VendorPicker value={f.values.vendorId} onChange={(id) => f.set('vendorId', id as any)} />
             </FormField>
             <FormField label="Expected At (ISO 8601)">
               <input value={f.values.expectedAt ?? ''} onChange={f.onChange('expectedAt')}

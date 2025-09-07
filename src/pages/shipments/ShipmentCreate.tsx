@@ -6,16 +6,18 @@ import FormField from '../../components/ui/FormField';
 import { Shipment, PositiveInt } from '../../lib/contracts';
 import { upsertShipment } from '../../lib/repos/shipmentRepo';
 import { useToast } from '../../components/ui/Toast';
+import ClientPicker from '../../components/pickers/ClientPicker';
+import InventoryPicker from '../../components/pickers/InventoryPicker';
 
 const LineEdit = z.object({
   id: z.string().uuid(),
-  itemId: z.string().uuid(),
+  itemId: z.string(),
   qty: PositiveInt,
 });
 
 const CreateSchema = z.object({
   id: z.string().uuid(),
-  clientId: z.string().uuid(),
+  clientId: z.string(),
   createdAt: z.string(),              // ISODate per contract; we'll rely on form to input correctly
   shippedAt: z.string().optional(),
   carrier: z.enum(["UPS","FedEx","USPS","DHL","Other"]).default("Other"),
@@ -29,7 +31,7 @@ type Shape = z.infer<typeof CreateSchema>;
 function initial(): Shape {
   return {
     id: crypto.randomUUID(),
-    clientId: crypto.randomUUID(),
+    clientId: '',
     createdAt: new Date().toISOString(),
     shippedAt: undefined,
     carrier: "Other",
@@ -37,7 +39,7 @@ function initial(): Shape {
     status: "Pending",
     lines: [{
       id: crypto.randomUUID(),
-      itemId: crypto.randomUUID(),
+      itemId: '',
       qty: 1,
     }]
   };
@@ -49,7 +51,7 @@ export default function ShipmentCreate() {
   const { push } = useToast();
 
   function addLine() {
-    f.set('lines', [...f.values.lines, { id: crypto.randomUUID(), itemId: crypto.randomUUID(), qty: 1 }]);
+    f.set('lines', [...f.values.lines, { id: crypto.randomUUID(), itemId: '', qty: 1 }]);
   }
 
   function removeLine(idx: number) {
@@ -94,9 +96,8 @@ export default function ShipmentCreate() {
           padding:'0.75rem', marginBottom:'0.75rem', background:'rgba(255,255,255,0.03)'
         }}>
           <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'0.5rem' }}>
-            <FormField label="Client ID">
-              <input value={f.values.clientId} onChange={f.onChange('clientId')}
-                style={{ background:'transparent', color:'var(--color-fg)', border:'1px solid var(--color-border)', borderRadius:'var(--radius)', padding:'0.5rem' }}/>
+            <FormField label="Client">
+              <ClientPicker value={f.values.clientId} onChange={(id) => f.set('clientId', id as any)} />
             </FormField>
             <FormField label="Created At (ISO)">
               <input value={f.values.createdAt} onChange={f.onChange('createdAt')}
@@ -142,10 +143,15 @@ export default function ShipmentCreate() {
             padding:'0.5rem', marginBottom:'0.5rem'
           }}>
             <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr auto', gap:'0.5rem' }}>
-              <FormField label="Item ID">
-                <input value={ln.itemId} onChange={e => {
-                  const copy = [...f.values.lines]; copy[idx] = { ...ln, itemId: e.target.value }; f.set('lines', copy);
-                }} style={{ background:'transparent', color:'var(--color-fg)', border:'1px solid var(--color-border)', borderRadius:'var(--radius)', padding:'0.5rem' }}/>
+              <FormField label="Item">
+                <InventoryPicker
+                  value={ln.itemId}
+                  onChange={(id) => {
+                    const copy = [...f.values.lines];
+                    copy[idx] = { ...ln, itemId: id as any };
+                    f.set('lines', copy);
+                  }}
+                />
               </FormField>
               <FormField label="Quantity">
                 <input type="number" value={ln.qty} onChange={e => {
