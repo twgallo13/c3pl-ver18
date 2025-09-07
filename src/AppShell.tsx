@@ -5,6 +5,8 @@ import type { AppRoute } from './routes/registry';
 import NotFound from './components/NotFound';
 import RoleSwitcher from './components/RoleSwitcher';
 import { APP_VERSION } from './version';
+import ErrorBoundary from './components/ui/ErrorBoundary';
+import Loading from './components/ui/Loading';
 
 function getCurrentRole(): string {
   // Temp local role until server RBAC is wired; default Admin for access
@@ -53,13 +55,17 @@ export default function AppShell() {
       </aside>
 
       <main style={{ padding: '1rem' }}>
-        <Routes>
-          {routes.map(({ path, component: C }) => (
-            <Route key={path} path={path} element={<C />} />
-          ))}
-          <Route path="/" element={<Navigate to={routes[0]?.path || '/not-found'} replace />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <ErrorBoundary>
+          <React.Suspense fallback={<Loading />}>
+            <Routes>
+              {routes.map(({ path, component: C }) => (
+                <Route key={path} path={path} element={<C />} />
+              ))}
+              <Route path="/" element={<Navigate to={routes[0]?.path || '/not-found'} replace />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </React.Suspense>
+        </ErrorBoundary>
       </main>
     </div>
   );
