@@ -21,3 +21,8 @@ export function upsertClient(c: z.infer<typeof Client>): void {
   else items.unshift(c);
   saveJSON(KEY, items);
 }
+
+export function removeClient(id: string): void {
+  const items = getClients().filter(i => i.id !== id);
+  saveJSON(KEY, items);
+}

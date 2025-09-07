@@ -1,14 +1,18 @@
 import React from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import Loading from '../../components/ui/Loading';
 import ErrorState from '../../components/ui/ErrorState';
 import EmptyState from '../../components/ui/EmptyState';
-import { getClients } from '../../lib/repos/clientRepo';
+import { Button } from '../../components/ui/button';
+import { useToast } from '../../components/ui/Toast';
+import { getClients, removeClient } from '../../lib/repos/clientRepo';
 import { getPurchaseOrders } from '../../lib/repos/poRepo';
 import { getShipments } from '../../lib/repos/shipmentRepo';
 
 export default function ClientDetails() {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const { push } = useToast();
   const [status, setStatus] = React.useState<'loading'|'ready'|'empty'|'error'>('loading');
   const [error, setError] = React.useState<string|undefined>();
   const [client, setClient] = React.useState<ReturnType<typeof getClients>[number] | null>(null);
@@ -29,6 +33,19 @@ export default function ClientDetails() {
     }
   }, [id]);
 
+  const handleDelete = async () => {
+    if (!confirm('Delete this client?')) return;
+    if (!id) return;
+    
+    try {
+      removeClient(id);
+      push({ text: 'Client deleted', kind: 'success' });
+      navigate('/clients');
+    } catch (e) {
+      push({ text: 'Failed to delete client', kind: 'error' });
+    }
+  };
+
   if (status === 'loading') return <Loading label="Loading client…" />;
   if (status === 'error') return <ErrorState title="Failed to load" detail={error} />;
   if (status === 'empty') return <EmptyState title="Client not found" detail="Go back to the list and pick another." />;
@@ -37,11 +54,22 @@ export default function ClientDetails() {
     <div>
       <div style={{ display:'flex', justifyContent:'space-between', alignItems:'baseline' }}>
         <h1 style={{ marginTop: 0 }}>{client!.name}</h1>
-        <div>
-          <Link to={`/clients/${client!.id}/edit`} style={{ color: 'var(--color-muted)', textDecoration:'none', marginRight: '0.75rem' }}>
+        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+          <Button 
+            variant="outline" 
+            onClick={() => navigate(`/clients/${client!.id}/edit`)}
+            aria-label="Edit Client"
+          >
             Edit
-          </Link>
-          <Link to="/clients" style={{ color: 'var(--color-muted)', textDecoration:'none' }}>← Back to Clients</Link>
+          </Button>
+          <Button 
+            variant="destructive" 
+            onClick={handleDelete}
+            aria-label="Delete Client"
+          >
+            Delete
+          </Button>
+          <Link to="/clients" style={{ color: 'var(--color-muted)', textDecoration:'none', marginLeft: '0.5rem' }}>← Back to Clients</Link>
         </div>
       </div>
 
