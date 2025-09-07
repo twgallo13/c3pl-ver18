@@ -3,6 +3,8 @@ import { Routes, Route, Navigate, Link, useLocation } from 'react-router-dom';
 import routeRegistry from './routes/registry';
 import type { AppRoute } from './routes/registry';
 import NotFound from './components/NotFound';
+import RoleSwitcher from './components/RoleSwitcher';
+import { APP_VERSION } from './version';
 
 function getCurrentRole(): string {
   // Temp local role until server RBAC is wired; default Admin for access
@@ -24,10 +26,16 @@ export default function AppShell() {
         padding: '1rem',
         background: 'rgba(255,255,255,0.02)'
       }}>
-        <div style={{ fontWeight: 600, marginBottom: '0.75rem' }}>Collab3PL V18</div>
-        <div style={{ color: 'var(--color-muted)', fontSize: 12, marginBottom: '0.75rem' }}>
-          Role: {role}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '0.5rem' }}>
+          <div style={{ fontWeight: 600 }}>Collab3PL</div>
+          <div style={{ fontSize: 12, color: 'var(--color-muted)' }}>{APP_VERSION}</div>
         </div>
+
+        {/* Role switcher (local tester) */}
+        <div style={{ marginBottom: '0.75rem' }}>
+          <RoleSwitcher />
+        </div>
+
         <nav style={{ display: 'grid', gap: '0.5rem' }}>
           {routes.map(r => (
             <Link key={r.path} to={r.path} style={{
