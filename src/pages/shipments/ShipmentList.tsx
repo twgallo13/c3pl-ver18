@@ -25,45 +25,51 @@ export default function ShipmentList() {
       (qTrack ? ci(s.tracking, qTrack) : true) &&
       (status ? s.status === status : true)
     ),
-  [items, qCarrier, qTrack, status]);
+    [items, qCarrier, qTrack, status]);
 
   return (
     <div>
-      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'baseline' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
         <h1 style={{ marginTop: 0 }}>Shipments</h1>
         <Link to="/shipments/new" style={{
-          textDecoration:'none', border:'1px solid var(--color-border)', borderRadius:'var(--radius)',
-          padding:'0.4rem 0.6rem', color:'var(--color-fg)'
+          textDecoration: 'none', border: '1px solid var(--color-border)', borderRadius: 'var(--radius)',
+          padding: '0.4rem 0.6rem', color: 'var(--color-fg)'
         }}>+ New</Link>
       </div>
 
-      <div style={{ display:'flex', gap:'0.5rem', margin:'0.75rem 0', flexWrap:'wrap' }}>
+      <div style={{ display: 'flex', gap: '0.5rem', margin: '0.75rem 0', flexWrap: 'wrap' }}>
         <input
           placeholder="Carrier"
           value={qCarrier} onChange={e => setQCarrier(e.target.value)}
-          style={{ background:'transparent', color:'var(--color-fg)', border:'1px solid var(--color-border)',
-            borderRadius:'var(--radius)', padding:'0.5rem', minWidth:120 }}
+          style={{
+            background: 'transparent', color: 'var(--color-fg)', border: '1px solid var(--color-border)',
+            borderRadius: 'var(--radius)', padding: '0.5rem', minWidth: 120
+          }}
         />
         <input
           placeholder="Tracking"
           value={qTrack} onChange={e => setQTrack(e.target.value)}
-          style={{ background:'transparent', color:'var(--color-fg)', border:'1px solid var(--color-border)',
-            borderRadius:'var(--radius)', padding:'0.5rem', minWidth:120 }}
+          style={{
+            background: 'transparent', color: 'var(--color-fg)', border: '1px solid var(--color-border)',
+            borderRadius: 'var(--radius)', padding: '0.5rem', minWidth: 120
+          }}
         />
-        <select 
-          value={status} 
+        <select
+          value={status}
           onChange={e => setStatus(e.target.value)}
-          style={{ background:'transparent', color:'var(--color-fg)', border:'1px solid var(--color-border)',
-            borderRadius:'var(--radius)', padding:'0.45rem 0.5rem' }}
+          style={{
+            background: 'transparent', color: 'var(--color-fg)', border: '1px solid var(--color-border)',
+            borderRadius: 'var(--radius)', padding: '0.45rem 0.5rem'
+          }}
         >
-          <option value="" style={{ color:'black' }}>All statuses</option>
-          {['Pending','Packed','Shipped','Delivered','Exception'].map(s=>
-            <option key={s} value={s} style={{ color:'black' }}>{s}</option>
+          <option value="" style={{ color: 'black' }}>All statuses</option>
+          {['Pending', 'Packed', 'Shipped', 'Delivered', 'Exception'].map(s =>
+            <option key={s} value={s} style={{ color: 'black' }}>{s}</option>
           )}
         </select>
         <button onClick={refresh} style={{
-          border:'1px solid var(--color-border)', borderRadius:'var(--radius)',
-          padding:'0.5rem 0.75rem', background:'transparent', color:'var(--color-fg)', cursor:'pointer'
+          border: '1px solid var(--color-border)', borderRadius: 'var(--radius)',
+          padding: '0.5rem 0.75rem', background: 'transparent', color: 'var(--color-fg)', cursor: 'pointer'
         }}>Refresh</button>
         <button
           onClick={() => {
@@ -73,31 +79,33 @@ export default function ShipmentList() {
               createdAt: s.createdAt, shippedAt: s.shippedAt ?? '',
               lineCount: s.lines.length
             }));
-            const csv = toCSV(allRows, ['id','clientId','carrier','tracking','status','createdAt','shippedAt','lineCount']);
-            downloadCSV(`shipments_${new Date().toISOString().slice(0,10)}.csv`, csv);
+            const csv = toCSV(allRows, ['id', 'clientId', 'carrier', 'tracking', 'status', 'createdAt', 'shippedAt', 'lineCount']);
+            downloadCSV(`shipments_${new Date().toISOString().slice(0, 10)}.csv`, csv);
           }}
-          style={{ border:'1px solid var(--color-border)', borderRadius:'var(--radius)',
-                   padding:'0.5rem 0.75rem', background:'transparent',
-                   color:'var(--color-fg)', cursor:'pointer' }}
+          style={{
+            border: '1px solid var(--color-border)', borderRadius: 'var(--radius)',
+            padding: '0.5rem 0.75rem', background: 'transparent',
+            color: 'var(--color-fg)', cursor: 'pointer'
+          }}
         >
           Export CSV
         </button>
       </div>
 
       {filtered.length === 0 ? (
-        <p style={{ color:'var(--color-muted)' }}>No shipments.</p>
+        <p style={{ color: 'var(--color-muted)' }}>No shipments.</p>
       ) : (
-        <ul style={{ listStyle:'none', padding:0 }}>
+        <ul style={{ listStyle: 'none', padding: 0 }}>
           {filtered.map(s => (
             <li key={s.id} style={{
-              border:'1px solid var(--color-border)', borderRadius:'var(--radius)',
-              padding:'0.5rem', marginBottom:'0.5rem'
+              border: '1px solid var(--color-border)', borderRadius: 'var(--radius)',
+              padding: '0.5rem', marginBottom: '0.5rem'
             }}>
-              <div style={{ display:'flex', justifyContent:'space-between', gap:'0.5rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', gap: '0.5rem' }}>
                 <div>
-                  <div><strong>Shipment {s.id.slice(0,8)}</strong> — {s.status}</div>
-                  <div style={{ color:'var(--color-muted)', fontSize:12 }}>
-                    Client: <Link to={`/clients/${s.clientId}`} style={{ color:'var(--color-muted)', textDecoration:'none' }}>
+                  <div><strong>Shipment {s.id.slice(0, 8)}</strong> — {s.status}</div>
+                  <div style={{ color: 'var(--color-muted)', fontSize: 12 }}>
+                    Client: <Link to={`/clients/${s.clientId}`} style={{ color: 'var(--color-muted)', textDecoration: 'none' }}>
                       {clientName(s.clientId)}
                     </Link>
                     {` · Carrier: ${s.carrier}`}
@@ -106,7 +114,7 @@ export default function ShipmentList() {
                     {s.shippedAt ? ` · Shipped: ${new Date(s.shippedAt).toLocaleString()}` : ''}
                   </div>
                 </div>
-                <div style={{ display:'flex', gap:'0.5rem' }}>
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
                   <button onClick={() => {
                     if (!confirm('Delete this shipment?')) return;
                     // Only run async after confirm
@@ -114,8 +122,8 @@ export default function ShipmentList() {
                     refresh();
                     push({ text: 'Shipment deleted', kind: 'success' });
                   }} style={{
-                    border:'1px solid var(--color-border)', borderRadius:'var(--radius)',
-                    padding:'0.35rem 0.6rem', background:'transparent', color:'var(--color-fg)', cursor:'pointer'
+                    border: '1px solid var(--color-border)', borderRadius: 'var(--radius)',
+                    padding: '0.35rem 0.6rem', background: 'transparent', color: 'var(--color-fg)', cursor: 'pointer'
                   }}>Delete</button>
                 </div>
               </div>
