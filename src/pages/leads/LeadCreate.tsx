@@ -61,10 +61,9 @@ export default function LeadCreate() {
 
   return (
     <div style={{ maxWidth: 560 }}>
-      <h1 style={{ marginTop: 0 }}>Leads — Create & Promote (Stub)</h1>
+      <h1 style={{ marginTop: 0 }}>Leads — Create & Promote</h1>
       <p style={{ color: 'var(--color-muted)' }}>
-        This page demonstrates the Lead ➝ Client workflow with validation.
-        Storage and real conversion will arrive in later prompts.
+        Create new leads and promote them to clients. All data persists locally for this demo.
       </p>
 
       <form onSubmit={e => { e.preventDefault(); }}>
@@ -156,7 +155,7 @@ export default function LeadCreate() {
               cursor: 'pointer'
             }}
           >
-            Save Lead (stub)
+            Save Lead
           </button>
 
           <button
@@ -172,7 +171,7 @@ export default function LeadCreate() {
               cursor: 'pointer'
             }}
           >
-            Promote to Client (stub)
+            Promote to Client
           </button>
         </div>
 
