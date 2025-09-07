@@ -12,6 +12,8 @@ import ClientDetails from '../pages/clients/ClientDetails';
 import ClientEdit from '../pages/clients/ClientEdit';
 import InventoryList from '../pages/inventory/InventoryList';
 import InventoryCreate from '../pages/inventory/InventoryCreate';
+import POList from '../pages/po/POList';
+import POCreate from '../pages/po/POCreate';
 
 const FinanceDashboard: React.FC = () => <div>Finance Dashboard Placeholder</div>;
 
@@ -93,6 +95,22 @@ export const routeRegistry: AppRoute[] = [
     icon: '➕',
     parent: '/inventory',
     roles: ['Admin', 'Ops', 'WarehouseManager'],
+  },
+  {
+    path: '/po',
+    component: POList,
+    label: 'Purchase Orders',
+    icon: '🧾',
+    parent: null,
+    roles: ['Admin', 'Finance', 'Ops'],
+  },
+  {
+    path: '/po/new',
+    component: POCreate,
+    label: 'New Purchase Order',
+    icon: '➕',
+    parent: '/po',
+    roles: ['Admin', 'Finance', 'Ops'],
   },
 ];
 
