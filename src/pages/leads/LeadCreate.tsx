@@ -34,6 +34,11 @@ export default function LeadCreate() {
   const [promotedMessage, setPromotedMessage] = React.useState<string | null>(null);
   const [leads, setLeads] = React.useState(() => getLeads());
 
+  const isValid = React.useMemo(
+    () => LeadSchema.safeParse(f.values).success,
+    [f.values]
+  );
+
   async function saveLead() {
     const parsed = validate(LeadSchema, f.values);
     if (!parsed.success) return;
@@ -137,7 +142,7 @@ export default function LeadCreate() {
           <button
             type="button"
             onClick={saveLead}
-            disabled={!f.validate()}
+            disabled={!isValid}
             style={{
               border: '1px solid var(--color-border)',
               borderRadius: 'var(--radius)',
@@ -153,7 +158,7 @@ export default function LeadCreate() {
           <button
             type="button"
             onClick={promoteToClient}
-            disabled={!f.validate()}
+            disabled={!isValid}
             style={{
               border: '1px solid var(--color-border)',
               borderRadius: 'var(--radius)',
