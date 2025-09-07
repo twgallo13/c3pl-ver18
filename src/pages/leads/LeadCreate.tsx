@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { useZodForm } from '../../lib/forms/useZodForm';
 import FormField from '../../components/ui/FormField';
 import { validate, UUID, ISODate, Email, Phone, NonEmptyString } from '../../lib/contracts';
+import { getLeads, upsertLead } from '../../lib/repos/leadRepo';
 
 const LeadSchema = z.object({
   id: UUID,
@@ -31,21 +32,22 @@ function newLead(): LeadShape {
 export default function LeadCreate() {
   const f = useZodForm(LeadSchema, newLead());
   const [promotedMessage, setPromotedMessage] = React.useState<string | null>(null);
+  const [leads, setLeads] = React.useState(() => getLeads());
 
   async function saveLead() {
-    // validate & "save" (no persistence yet)
     const parsed = validate(LeadSchema, f.values);
-    if (!parsed.success) return; // errors already shown by hook
-    alert(`Lead saved (stub):\n${JSON.stringify(parsed.data, null, 2)}`);
+    if (!parsed.success) return;
+    upsertLead(parsed.data);
+    setLeads(getLeads());
+    alert(`Lead saved:\n${JSON.stringify(parsed.data, null, 2)}`);
   }
 
   async function promoteToClient() {
     const parsed = validate(LeadSchema, f.values);
     if (!parsed.success) return;
-    // Stub: simulate promotion. V18.0.13 will convert & persist.
-    setPromotedMessage(
-      `Promoted (stub): ${parsed.data.name} → Client (id will match Lead id for now)`
-    );
+    upsertLead(parsed.data);
+    setLeads(getLeads());
+    setPromotedMessage(`Promoted (stub): ${parsed.data.name} → Client (id matches Lead)`);
   }
 
   return (
@@ -177,6 +179,29 @@ export default function LeadCreate() {
           </div>
         )}
       </form>
+
+      <div style={{ marginTop: '1rem' }}>
+        <h2 style={{ margin: 0 }}>Saved Leads</h2>
+        {leads.length === 0 ? (
+          <p style={{ color: 'var(--color-muted)' }}>No leads yet.</p>
+        ) : (
+          <ul style={{ listStyle: 'none', padding: 0, margin: '0.5rem 0' }}>
+            {leads.map(l => (
+              <li key={l.id} style={{
+                border: '1px solid var(--color-border)',
+                borderRadius: 'var(--radius)',
+                padding: '0.5rem',
+                marginBottom: '0.5rem'
+              }}>
+                <div><strong>{l.name}</strong>{l.company ? ` — ${l.company}` : ''}</div>
+                <div style={{ color: 'var(--color-muted)', fontSize: 12 }}>
+                  {l.email || 'no email'} · {l.phone || 'no phone'}
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
     </div>
   );
 }
