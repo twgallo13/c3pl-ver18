@@ -1,1 +1,10 @@
-/* This is where custom CSS goes */
+@theme {
+  --spacing: 0.25rem;
+  --radius: 0.5rem;
+  --color-bg: #0b0d10;
+  --color-fg: #e8eaed;
+  --color-muted: #8a9099;
+  --color-border: #262a33;
+  --color-accent: #4f7cff;
+}
+body { background-color: var(--color-bg); color: var(--color-fg); font-family: sans-serif; margin: 0; }
