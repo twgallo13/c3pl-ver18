@@ -13,10 +13,16 @@ import ClientDetails from '@/pages/clients/ClientDetails';
 import ClientEdit from '@/pages/clients/ClientEdit';
 import InventoryList from '../pages/inventory/InventoryList';
 import InventoryCreate from '../pages/inventory/InventoryCreate';
+import InventoryDetails from '../pages/inventory/InventoryDetails';
+import InventoryEdit from '../pages/inventory/InventoryEdit';
 import POList from '../pages/po/POList';
 import POCreate from '../pages/po/POCreate';
+import PODetails from '../pages/po/PODetails';
+import POEdit from '../pages/po/POEdit';
 import ShipmentList from '../pages/shipments/ShipmentList';
 import ShipmentCreate from '../pages/shipments/ShipmentCreate';
+import ShipmentDetails from '../pages/shipments/ShipmentDetails';
+import ShipmentEdit from '../pages/shipments/ShipmentEdit';
 
 const FinanceDashboard: React.FC = () => <div>Finance Dashboard Placeholder</div>;
 
@@ -87,7 +93,36 @@ export const routeRegistry: AppRoute[] = [
     parent: '/clients',
     roles: ['Admin', 'Manager'],
   },
-  // ...existing code for other routes...
+  {
+    path: '/inventory',
+    component: InventoryList,
+    label: 'Inventory',
+    icon: '📦',
+    parent: null,
+    roles: ['Admin', 'Ops', 'WarehouseManager', 'WarehouseStaff'],
+  },
+  {
+    path: '/inventory/new',
+    component: InventoryCreate,
+    label: 'New Inventory Item',
+    icon: '➕',
+    parent: '/inventory',
+    roles: ['Admin', 'Ops', 'WarehouseManager'],
+  },
+  {
+    path: '/inventory/:id',
+    component: InventoryDetails,
+    label: 'Inventory Details',
+    parent: '/inventory',
+    roles: ['Admin', 'Ops', 'WarehouseManager', 'WarehouseStaff'],
+  },
+  {
+    path: '/inventory/:id/edit',
+    component: InventoryEdit,
+    label: 'Edit Inventory Item',
+    parent: '/inventory',
+    roles: ['Admin', 'Ops', 'WarehouseManager'],
+  },
   {
     path: '/po',
     component: POList,
@@ -105,6 +140,20 @@ export const routeRegistry: AppRoute[] = [
     roles: ['Admin', 'Finance', 'Ops'],
   },
   {
+    path: '/po/:id',
+    component: PODetails,
+    label: 'PO Details',
+    parent: '/po',
+    roles: ['Admin', 'Finance', 'Ops'],
+  },
+  {
+    path: '/po/:id/edit',
+    component: POEdit,
+    label: 'Edit PO',
+    parent: '/po',
+    roles: ['Admin', 'Finance', 'Ops'],
+  },
+  {
     path: '/shipments',
     component: ShipmentList,
     label: 'Shipments',
@@ -117,6 +166,20 @@ export const routeRegistry: AppRoute[] = [
     component: ShipmentCreate,
     label: 'New Shipment',
     icon: '➕',
+    parent: '/shipments',
+    roles: ['Admin', 'Ops', 'WarehouseManager'],
+  },
+  {
+    path: '/shipments/:id',
+    component: ShipmentDetails,
+    label: 'Shipment Details',
+    parent: '/shipments',
+    roles: ['Admin', 'Ops', 'WarehouseManager', 'WarehouseStaff', 'CS'],
+  },
+  {
+    path: '/shipments/:id/edit',
+    component: ShipmentEdit,
+    label: 'Edit Shipment',
     parent: '/shipments',
     roles: ['Admin', 'Ops', 'WarehouseManager'],
   },
