@@ -2,18 +2,18 @@
 
 function escapeCell(v: unknown): string {
   if (v == null) return '';
-  const s = String(v);
+    // wrap in quotes 
   if (/[,"\n]/.test(s)) {
     // wrap in quotes and escape inner quotes
     return `"${s.replace(/"/g, '""')}"`;
-  }
-  return s;
+  c
+}
+e
+
+  a.href = url;
+  a.click();
 }
 
-export function toCSV<T extends Record<string, any>>(rows: T[], headers?: string[]): string {
-  if (!rows || rows.length === 0) return '';
-  const cols = headers ?? Object.keys(rows[0]);
-  const head = cols.join(',');
   const body = rows.map(r => cols.map(c => escapeCell(r[c])).join(',')).join('\n');
   return `${head}\n${body}`;
 }
