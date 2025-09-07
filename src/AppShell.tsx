@@ -58,8 +58,7 @@ function AuthedAppShellInner() {
   ] as const;
 
   return (
-    <ToastProvider>
-      <div style={{ display: 'grid', gridTemplateColumns: '240px 1fr', minHeight: '100vh' }}>
+    <div style={{ display: 'grid', gridTemplateColumns: '240px 1fr', minHeight: '100vh' }}>
         <aside style={{
           borderRight: `1px solid var(--color-border)`,
           padding: '1rem',
@@ -149,14 +148,15 @@ function AuthedAppShellInner() {
           </ErrorBoundary>
         </main>
       </div>
-    </ToastProvider>
   );
 }
 
 export default function AppShell() {
   return (
     <AuthProvider>
-      <AuthedAppShellInner />
+      <ToastProvider>
+        <AuthedAppShellInner />
+      </ToastProvider>
     </AuthProvider>
   );
 }
