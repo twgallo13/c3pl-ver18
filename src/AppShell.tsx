@@ -8,6 +8,9 @@ import { APP_VERSION } from './version';
 import ErrorBoundary from './components/ui/ErrorBoundary';
 import Loading from './components/ui/Loading';
 import { ToastProvider } from './components/ui/Toast';
+import { AuthProvider, useAuth } from './components/auth/AuthProvider';
+import LoginGate from './components/auth/LoginGate';
+import NotAuthorized from './pages/NotAuthorized';
 
 function getCurrentRole(): string {
   // Temp local role until server RBAC is wired; default Admin for access
@@ -17,8 +20,22 @@ function allowedRoutes(role: string): AppRoute[] {
   return routeRegistry.filter(r => r.roles.includes(role) || r.roles.includes('All Internal'));
 }
 
-export default function AppShell() {
-  const role = getCurrentRole();
+// Helper component to check route permissions
+function RequireRole({ roles, currentRole, children }: { 
+  roles?: string[]|null; 
+  currentRole: string|null; 
+  children: React.ReactNode; 
+}) {
+  if (!roles || roles.length === 0) return <>{children}</>;
+  if (currentRole && roles.includes(currentRole)) return <>{children}</>;
+  return <NotAuthorized />;
+}
+
+function AuthedAppShellInner() {
+  const { user } = useAuth();
+  if (!user) return <LoginGate />;
+
+  const role = user.role;
   const routes = allowedRoutes(role);
   const location = useLocation();
 
@@ -60,8 +77,12 @@ export default function AppShell() {
           <ErrorBoundary>
             <React.Suspense fallback={<Loading />}>
               <Routes>
-                {routes.map(({ path, component: C }) => (
-                  <Route key={path} path={path} element={<C />} />
+                {routes.map(({ path, component: C, roles }) => (
+                  <Route key={path} path={path} element={
+                    <RequireRole roles={roles} currentRole={user.role}>
+                      <C />
+                    </RequireRole>
+                  } />
                 ))}
                 <Route path="/" element={<Navigate to={routes[0]?.path || '/not-found'} replace />} />
                 <Route path="*" element={<NotFound />} />
@@ -71,5 +92,13 @@ export default function AppShell() {
         </main>
       </div>
     </ToastProvider>
+  );
+}
+
+export default function AppShell() {
+  return (
+    <AuthProvider>
+      <AuthedAppShellInner />
+    </AuthProvider>
   );
 }
