@@ -1,9 +1,16 @@
+// src/lib/auth.ts
+
 export type User = {
   id: string;
   name: string;
   role:
-    | 'Admin' | 'Finance' | 'Ops' | 'CS'
-    | 'AccountManager' | 'WarehouseManager' | 'WarehouseStaff';
+    | 'Admin'
+    | 'Finance'
+    | 'Ops'
+    | 'CS'
+    | 'AccountManager'
+    | 'WarehouseManager'
+    | 'WarehouseStaff';
 };
 
 const KEY = 'collab3pl.v18:authUser';
