@@ -1,3 +1,44 @@
+/* --- Contrast-safe global button fallbacks (V18.0.31) --- */
+:root {
+  --btn-bg-primary: #111827;
+  /* near-black */
+  --btn-fg-primary: #ffffff;
+  --btn-bg-muted: #e5e7eb;
+  /* gray-200 */
+  --btn-fg-muted: #111827;
+}
+
+:root.dark {
+  --btn-bg-primary: #f3f4f6;
+  /* gray-100 */
+  --btn-fg-primary: #111827;
+  --btn-bg-muted: #374151;
+  /* gray-700 */
+  --btn-fg-muted: #f9fafb;
+  /* gray-50 */
+}
+
+/* Fallback: any <button> without an explicit bg/text/btn- class */
+button:not([class*="bg-"]):not([class*="text-"]):not([class*="btn-"]) {
+  background-color: var(--btn-bg-muted);
+  color: var(--btn-fg-muted);
+  border-radius: 0.75rem;
+  /* rounded-xl */
+  padding: 0.5rem 1rem;
+  /* py-2 px-4 */
+}
+
+/* Data-variant hooks used by shared Button (safe if applied on plain buttons too) */
+button[data-variant="primary"] {
+  background-color: var(--btn-bg-primary);
+  color: var(--btn-fg-primary);
+}
+
+button[data-variant="muted"] {
+  background-color: var(--btn-bg-muted);
+  color: var(--btn-fg-muted);
+}
+
 @import "tailwindcss";
 
 @import '@radix-ui/colors/sage-dark.css' layer(base);
@@ -77,6 +118,7 @@
   color utility to any element that depends on these defaults.
 */
 @layer base {
+
   *,
   ::after,
   ::before,
