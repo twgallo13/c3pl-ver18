@@ -25,11 +25,15 @@
       "@/*": [
         "./src/*"
       ]
-    }
+    },
+    "types": [
+      "vite/client"
+    ]
   },
   "include": [
     "src"
   ],
-  "types": ["vite/client"]
-  "types": ["vite/client"]
+  "types": [
+    "vite/client"
+  ]
 }

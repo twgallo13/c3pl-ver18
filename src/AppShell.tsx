@@ -51,7 +51,7 @@ function AuthedAppShellInner() {
   }
   const visibleRoutes = routeRegistry.filter(r => r.label && canSee(r, role));
   // Dev-only warning for unlabeled routes
-  if (process.env.NODE_ENV !== "production") {
+  if (import.meta.env.MODE !== "production") {
     const unlabeled = routeRegistry.filter(r => !r.label);
     if (unlabeled.length) {
       // eslint-disable-next-line no-console
@@ -85,7 +85,7 @@ function AuthedAppShellInner() {
       }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '0.5rem' }}>
           <div style={{ fontWeight: 600 }}>Collab3PL</div>
-          <div style={{ fontSize: 12, color: 'var(--color-muted)' }}>{APP_VERSION}</div>
+          <div style={{ fontSize: 12, color: 'var(--color-muted)' }}>{typeof __APP_VERSION__ !== 'undefined' && typeof __COMMIT_SHA__ !== 'undefined' ? `${__APP_VERSION__} • ${__COMMIT_SHA__}` : APP_VERSION}</div>
         </div>
 
         {/* Role switcher synced with auth */}
