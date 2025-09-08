@@ -15,7 +15,7 @@ export default defineConfig({
     },
   },
   define: {
-    __APP_VERSION__: JSON.stringify(process.env.npm_package_version ?? 'V18.0.59'),
+    __APP_VERSION__: JSON.stringify('V18.0.27'),
     __COMMIT_SHA__: JSON.stringify(process.env.VITE_COMMIT_SHA ?? 'dev'),
   },
 });

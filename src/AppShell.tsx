@@ -85,7 +85,7 @@ function AuthedAppShellInner() {
       }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '0.5rem' }}>
           <div style={{ fontWeight: 600 }}>Collab3PL</div>
-          <div style={{ fontSize: 12, color: 'var(--color-muted)' }}>{typeof __APP_VERSION__ !== 'undefined' && typeof __COMMIT_SHA__ !== 'undefined' ? `${__APP_VERSION__} • ${__COMMIT_SHA__}` : APP_VERSION}</div>
+          <div style={{ fontSize: 12, color: 'var(--color-muted)' }}>{APP_VERSION}</div>
         </div>
 
         {/* Role switcher synced with auth */}
