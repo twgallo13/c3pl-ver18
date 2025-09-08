@@ -161,17 +161,8 @@ export default function ShipmentEdit() {
         </div>
 
         <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.75rem' }}>
-          <Button variant="primary" type="submit" aria-label="Save Changes">
-            Save Changes
-          </Button>
-          <Button
-            variant="ghost"
-            type="button"
-            onClick={() => navigate(`/shipments/${id}`)}
-            aria-label="Cancel"
-          >
-            Cancel
-          </Button>
+          <Button variant="primary" type="submit" aria-label="Save Changes">Save Changes</Button>
+          <Button variant="ghost" type="button" onClick={() => navigate(`/shipments/${id}`)} aria-label="Cancel">Cancel</Button>
         </div>
       </form>
     </div>
