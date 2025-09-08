@@ -1,6 +1,8 @@
 // Healthz route component
+import { APP_VERSION } from '../version';
+
 const Healthz: React.FC = () => {
-  const appVersion = 'V18.0.27';
+  const appVersion = APP_VERSION;
   const commit = typeof __COMMIT_SHA__ !== 'undefined' ? __COMMIT_SHA__ : 'dev';
   const ts = new Date().toISOString();
   return (

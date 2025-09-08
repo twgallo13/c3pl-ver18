@@ -10,6 +10,7 @@ import { ToastProvider, useToast } from './components/ui/Toast';
 import { AuthProvider, useAuth } from './components/auth/AuthProvider';
 import LoginGate from './components/auth/LoginGate';
 import NotAuthorized from './pages/NotAuthorized';
+import { VersionBadge } from './components/system/VersionBadge';
 
 function allowedRoutes(role: string): AppRoute[] {
   return routeRegistry.filter(r => r.roles.includes(role) || r.roles.includes('All Internal'));
@@ -85,7 +86,7 @@ function AuthedAppShellInner() {
       }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '0.5rem' }}>
           <div style={{ fontWeight: 600 }}>Collab3PL</div>
-          <div style={{ fontSize: 12, color: 'var(--color-muted)' }}>{APP_VERSION}</div>
+          <VersionBadge prefix="Version" />
         </div>
 
         {/* Role switcher synced with auth */}
