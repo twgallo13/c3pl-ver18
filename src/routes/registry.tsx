@@ -1,3 +1,14 @@
+// Healthz route component
+const Healthz: React.FC = () => {
+  const appVersion = typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : 'V18.0.59';
+  const commit = typeof __COMMIT_SHA__ !== 'undefined' ? __COMMIT_SHA__ : 'dev';
+  const ts = new Date().toISOString();
+  return (
+    <pre style={{ padding: 16, fontSize: 16 }}>
+      {JSON.stringify({ appVersion, commit, ts }, null, 2)}
+    </pre>
+  );
+};
 // src/routes/registry.tsx
 
 // NOTE: Component imports are placeholders for the actual pages.
@@ -41,6 +52,13 @@ export interface AppRoute {
  * RBAC filtering will be applied by the App Shell/Router based on current user.role.
  */
 export const routeRegistry: AppRoute[] = [
+  {
+    path: '/healthz',
+    component: Healthz,
+    label: 'Healthz',
+    parent: null,
+    roles: [],
+  },
   {
     path: '/finance',
     component: DemoClient,

@@ -1,12 +1,12 @@
 {
   "name": "collab3pl-v18",
   "private": true,
-  "version": "18.0.0",
+  "version": "18.0.59",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "kill": "fuser -k 5000/tcp",
-    "build": "tsc -b --noCheck && vite build",
+  "build": "export VITE_COMMIT_SHA=$(git rev-parse --short HEAD) && tsc -b --noCheck && vite build",
     "lint": "eslint .",
     "optimize": "vite optimize",
     "preview": "vite preview",
