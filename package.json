@@ -6,11 +6,12 @@
   "scripts": {
     "dev": "vite",
     "kill": "fuser -k 5000/tcp",
-  "build": "export VITE_COMMIT_SHA=$(git rev-parse --short HEAD) && tsc -b --noCheck && vite build",
+    "build": "export VITE_COMMIT_SHA=$(git rev-parse --short HEAD) && tsc -b --noCheck && vite build",
     "lint": "eslint .",
     "optimize": "vite optimize",
     "preview": "vite preview",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "verify:ui": "grep -R \"buttonVariants\\|outline\\|size={\" src || true"
   },
   "dependencies": {
     "@github/spark": "^0.39.0",

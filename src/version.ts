@@ -1,3 +1,4 @@
+
 // src/version.ts
 /* Exposed via vite.config.ts -> define: { __APP_VERSION__, __COMMIT_SHA__ } */
 declare const __APP_VERSION__: string;
