@@ -16,7 +16,7 @@ type Filters = {
 
 export default function ShipmentList() {
   const [items, setItems] = React.useState(() => getShipments());
-  
+
   // Load persisted filters
   const loadFilters = React.useCallback((): Filters => {
     try {
@@ -29,10 +29,10 @@ export default function ShipmentList() {
 
   // Raw filter inputs (responsive to typing)
   const [rawFilters, setRawFilters] = React.useState<Filters>(loadFilters);
-  
+
   // Debounced filters (used for actual filtering)
   const [debouncedFilters, setDebouncedFilters] = React.useState<Filters>(rawFilters);
-  
+
   const { push } = useToast();
 
   // Debounce filter changes (200ms)

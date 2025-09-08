@@ -25,3 +25,7 @@ export function Button({ variant = 'primary', className = '', ...props }: Button
     />
   );
 }
+
+// Shim for backward compatibility with components that still use buttonVariants
+// This helps us transition without breaking everything at once
+// buttonVariants shim removed; use <Button variant="..." /> directly

@@ -29,7 +29,7 @@ export const ErrorFallback = ({ error, resetErrorBoundary }) => {
         <Button 
           onClick={resetErrorBoundary} 
           className="w-full"
-          variant="outline"
+          variant="ghost"
         >
           <RefreshCwIcon />
           Try Again

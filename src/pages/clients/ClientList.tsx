@@ -15,7 +15,7 @@ function readPersisted() {
     const parsed = JSON.parse(raw);
     return {
       query: typeof parsed.query === "string" ? parsed.query : "",
-      sortKey: (["name-asc","name-desc","created-asc","created-desc"].includes(parsed.sortKey)
+      sortKey: (["name-asc", "name-desc", "created-asc", "created-desc"].includes(parsed.sortKey)
         ? parsed.sortKey
         : "created-desc") as SortKey,
     };

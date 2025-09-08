@@ -174,8 +174,6 @@ function CarouselItem({ className, ...props }: ComponentProps<"div">) {
 
 function CarouselPrevious({
   className,
-  variant = "outline",
-  size = "icon",
   ...props
 }: ComponentProps<typeof Button>) {
   const { orientation, scrollPrev, canScrollPrev } = useCarousel()
@@ -183,8 +181,7 @@ function CarouselPrevious({
   return (
     <Button
       data-slot="carousel-previous"
-      variant={variant}
-      size={size}
+      variant="ghost"
       className={cn(
         "absolute size-8 rounded-full",
         orientation === "horizontal"
@@ -199,13 +196,11 @@ function CarouselPrevious({
       <ArrowLeft />
       <span className="sr-only">Previous slide</span>
     </Button>
-  )
+  );
 }
 
 function CarouselNext({
   className,
-  variant = "outline",
-  size = "icon",
   ...props
 }: ComponentProps<typeof Button>) {
   const { orientation, scrollNext, canScrollNext } = useCarousel()
@@ -213,8 +208,7 @@ function CarouselNext({
   return (
     <Button
       data-slot="carousel-next"
-      variant={variant}
-      size={size}
+      variant="ghost"
       className={cn(
         "absolute size-8 rounded-full",
         orientation === "horizontal"
@@ -229,7 +223,7 @@ function CarouselNext({
       <ArrowRight />
       <span className="sr-only">Next slide</span>
     </Button>
-  )
+  );
 }
 
 export {
