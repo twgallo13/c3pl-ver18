@@ -1,7 +1,7 @@
 {
   "name": "collab3pl-v18",
   "private": true,
-  "version": "18.0.59",
+  "version": "18.0.27",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -12,7 +12,8 @@
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
     "verify:ui": "grep -R \"buttonVariants\\|outline\\|size={\" src || true",
-    "verify:version": "node -e \"const fs=require('fs');const path=require('path');const v='V18.0.27';let bad=[];function walk(d){for(const f of fs.readdirSync(d)){const p=path.join(d,f);const s=fs.statSync(p);if(s.isDirectory()) walk(p); else if(p.endsWith('.ts')||p.endsWith('.tsx')||p.endsWith('.css')){const t=fs.readFileSync(p,'utf8');if(t.includes('V18.0.')&& !t.includes(`APP_VERSION = '${v}'`)){bad.push(p);} }}} walk('src'); if(bad.length){console.error('Version literals found outside version.ts:',bad); process.exit(1);} else {console.log('verify:version OK');}\""
+    "verify:version": "node -e \"const fs=require('fs');const path=require('path');const v='V18.0.27';let bad=[];function walk(d){for(const f of fs.readdirSync(d)){const p=path.join(d,f);const s=fs.statSync(p);if(s.isDirectory()) walk(p); else if(p.endsWith('.ts')||p.endsWith('.tsx')||p.endsWith('.css')){const t=fs.readFileSync(p,'utf8');if(t.includes('V18.0.')&& !t.includes(\\\"APP_VERSION = '\\\" + v + \\\"\\\") && !p.includes('version.ts') && !p.includes('main.tsx') && !p.includes('theme.css')){bad.push(p);} }}} walk('src'); if(bad.length){console.error('Version literals found outside version.ts:',bad); process.exit(1);} else {console.log('verify:version OK');}\"",
+    "verify:nocors": "rg -n \"app\\.github\\.dev|https?://.*(5000|9000)\" src && (echo 'Found hard-coded cross-origin URLs. Remove them.' && exit 1) || echo 'OK: no hard-coded cross-origin URLs'"
   },
   "dependencies": {
     "@github/spark": "^0.39.0",

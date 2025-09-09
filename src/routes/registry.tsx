@@ -28,6 +28,7 @@ import InventoryList from '../pages/inventory/InventoryList';
 import InventoryCreate from '../pages/inventory/InventoryCreate';
 import InventoryDetails from '../pages/inventory/InventoryDetails';
 import InventoryEdit from '../pages/inventory/InventoryEdit';
+import Meta from './meta';
 import POList from '../pages/po/POList';
 import POCreate from '../pages/po/POCreate';
 import PODetails from '../pages/po/PODetails';
@@ -58,6 +59,13 @@ export const routeRegistry: AppRoute[] = [
     path: '/healthz',
     component: Healthz,
     label: 'Healthz',
+    parent: null,
+    roles: [],
+  },
+  {
+    path: '/meta',
+    component: Meta,
+    label: 'Meta',
     parent: null,
     roles: [],
   },
